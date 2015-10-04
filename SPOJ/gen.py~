@@ -1,0 +1,14 @@
+from random import randint;
+
+f = file("in.in","w");
+N = 250000;
+M = 10000;
+
+f.write(str(N) + "\n");
+for i in range(N):
+	f.write(str(randint(1,50000)) + "\n");
+
+f.write(str(M) + "\n");
+for i in range(M):
+	f.write(str(randint(1,N)) + " " + str(randint(1,50000)) + "\n");
+
