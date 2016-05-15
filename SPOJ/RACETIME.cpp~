@@ -27,15 +27,16 @@ int main(){
 	int N,Q,a,b,x,ctr = -1;
 	scanf("%d %d",&N,&Q);
 	bucket_size = sqrt(N) + 1;	
+	bucket_size = min(bucket_size,N);
 	loop(i,N){
 		scanf("%d",&a);
 		A[i] = a;
 		if(i%bucket_size) bucket[ctr].pb(a);
 		else bucket[++ctr].pb(a); 
 	}
-	char c;
+	char c[10];
 	while(Q--){
-		scanf(" %c %d %d",&c,&a,&b);
+		scanf("%s %d %d",&c,&a,&b);
 		if(c == 'M'){
 			--a;
 			int u = a / bucket_size;
@@ -46,15 +47,15 @@ int main(){
 		else{
 			--a,--b;
 			scanf("%d",&x);
-			int u = a / bucket_size,ux = a % bucket_size, v = b / bucket_size ,vx = b % bucket_size;
+			int u = a / bucket_size, v = b / bucket_size;
 			int ans = 0;
-			if(u != v){
-				for(;ux < sz(bucket[u]);ux++) ans += bucket[u][ux] <= x;
-				for(;vx >= 0;vx--) ans += bucket[v][vx] <= x;
+			if(u == v) for(;a <= b;a++) ans += A[a] <= x;
+			else{
+				int ex = min((u + 1)*bucket_size - 1,N - 1),sy = v * bucket_size;
+				for(;a <= ex;a++) ans += A[a] <= x;
+				for(;b >= sy;b--) ans += A[b] <= x;
+				for(++u;u < v;u++) ans += upper_bound(all(bucket[u]),x) - bucket[u].begin();
 			}
-			else
-				for(;ux <= vx;ux++) ans += bucket[u][ux] <= x;
-			for(++u; u < v; ++u) ans += upper_bound(all(bucket[u]),x) - bucket[u].begin();
 			printf("%d\n",ans);
 		}
 	}

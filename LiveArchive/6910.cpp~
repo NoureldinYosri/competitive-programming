@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define print(A,t) cout << #A << ": "; copy(all(A),ostream_iterator<t>(cout," " )); cout << endl
+#define pi pair<int,int>
+#define point pi
+#define vi vector<int>
+#define ll long long
+#define pl pair<ll,ll>
+#define pre() cin.tie(0),cout.tie(0),ios_base::sync_with_stdio(0)
+#define popcnt(x) __builtin_popcount(x)
+using namespace std;
+
+const int MAX = 1 << 20;
+int P[MAX],PP[MAX];
+int id[MAX],W[MAX];
+pair<pi,pi> Q[MAX];
+int V[MAX];
+
+int get(int a){
+	return id[a] = (id[a] == a) ? a : get(id[a]);
+}
+
+void join(int a,int b){
+	a = get(a),b = get(b);
+	if(a == b) return;
+	if(W[a] > W[b]) swap(a,b);
+	W[a] += W[b];
+	id[b] = a;
+}
+
+int main(){
+	pre();
+	int K,n,q; char c; int a;
+	cin >> K;
+	loop(k,K){
+		cin >> n >> q;
+		loop(i,n + 1) id[i] = i,W[i] = 1;
+		loop(i,n) cin >> P[i + 1],PP[i + 1] = P[i + 1];
+		loop(i,q){
+			Q[i].first.first = i;
+			cin >> c;
+			Q[i].first.second = c;
+			cin >> Q[i].second.first;
+			if(Q[i].first.second == 'Q') cin >> Q[i].second.second;
+			else{
+				if(PP[Q[i].second.first] > 0) PP[Q[i].second.first] = -i;
+			}
+		}
+		loop(i,n + 1) if(PP[i] > 0) {
+			join(i,P[i]);
+		}
+		reverse(Q,Q + q);
+		vector<string> V;
+		cout << "Case #" << k + 1 << ":\n";		
+		loop(i,q){
+			if(Q[i].first.second == 'Q'){
+				V.pb((get(Q[i].second.first) == get(Q[i].second.second)) ? "YES\n" : "NO\n");
+			}
+			else{
+				if(Q[i].first.first == -PP[Q[i].second.first]) join(Q[i].second.first,P[Q[i].second.first]);
+			}
+		}
+			reverse(all(V));
+			for(auto v : V) cout << v;
+		
+	}
+}

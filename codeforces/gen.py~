@@ -1,0 +1,11 @@
+from random import randint;
+
+f = file("in.in","w");
+
+n = int(1e6);
+MAX = int(1e9);
+
+f.write(str(n) + " " + str(1000) + "\n");
+for i in range(n):
+	f.write(str(randint(1,int(1e9))) + "\n");
+

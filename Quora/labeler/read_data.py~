@@ -1,0 +1,47 @@
+from re import sub;
+from nltk.corpus import stopwords
+
+def smooth(X,T):
+	for i in xrange(T):
+		for word in X[i]:
+			if word in stopwords:
+				del X[i][word];
+	return X;
+
+def read():
+	T,E = map(int,raw_input().split());
+	X_train = [{} for i in xrange(T)];
+	Y_train = [[] for i in xrange(T)];
+	for i in xrange(T):
+		Y_train[i] = map(int,raw_input().split());
+		Y_train[i].pop(0);
+		line = raw_input();
+		line = sub('[^0-9a-zA-Z]+',' ',line);
+		line = line.split();		
+		for word in line:
+			word = word.lower();
+			if not X_train[i].has_key(word): X_train[i][word] = 0;
+			X_train[i][word] = X_train[i][word] + 1;
+	X_train = smooth(X_train,T);	
+	
+	X_test = [{} for i in xrange(E)];
+	for i in xrange(E):
+		line = raw_input();
+		line = sub('[^0-9a-zA-Z]+',' ',line);
+		line = line.split();		
+		for word in line:
+			word = word.lower();
+			if not X_test[i].has_key(word): X_test[i][word] = 0;
+			X_test[i][word] = X_test[i][word] + 1;
+	X_test = smooth(X_test,E);
+	return X_train,Y_train,X_test;
+
+
+#X,Y,X_t = read();
+#for i in xrange(len(X)):
+#	print X[i],Y[i];
+print set(stopwords.words();
+
+#print "----------------------";
+#for i in xrange(len(X_t)):
+#	print X_t[i];

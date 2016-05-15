@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define print(A,t) cout << #A << ": "; copy(all(A),ostream_iterator<t>(cout," " )); cout << endl
+#define pi pair<int,int>
+#define point pi
+#define vi vector<int>
+#define ll long long
+#define pl pair<ll,ll>
+#define pre() cin.tie(0),cout.tie(0),ios_base::sync_with_stdio(0)
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define prp(p) cout << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cout << #A << ": "; copy(A,A + n,ostream_iterator<t>(cout," " )); cout << endl
+using namespace std;
+
+int A[500000];
+int ST[500000*4];
+
+int build(int node,int s,int e){
+	if(s == e) return ST[node] = A[s];
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	return ST[node] = __gcd(build(left,1,m) ,build(right,m + 1,e));
+}
+
+int query(int node,int s,int e,int i,int j){
+	if(i <= s && e <= j) return ST[node];
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	if(j <= m) return query(left,s,m,i,j);
+	else if(m < i) return query(right,m + 1,e,i,j);
+	else return __gcd(query(left,s,m,i,m),query(right,m + 1,e,m + 1,j));
+}
+
+int main(){
+	int N,K;
+	while(scanf("%d %d",&N,&K) == 2){
+		loop(i,N) scanf("%d",A + i);
+		build(1,0,N - 1);
+		int s = 0,ans = A[0] >= K,g = A[0];
+		loop(i,N){
+			if(!i) continue;
+			g = __gcd(g,A[i]);
+			while(s < i && g < K) g = query(1,0,N - 1,++s,i);
+			if(g >= K) ans = max(ans,i - s + 1);
+		}
+		printf("%d\n",ans);
+	} 
+	return 0;
+}

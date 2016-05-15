@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define vi vector<int>
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define pre() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+const int MAX = 40000*3;
+int ST[MAX << 2];
+int n,m;
+int poster[MAX][2];
+int V[MAX];
+
+void build(int node,int s,int e){
+	ST[node] = -1;
+	if(s == e) return;
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	build(left,s,m);
+	build(right,m + 1,e);
+}
+
+void advance(int node,int s,int e){
+	if(s == e || ST[node] == -1) return;
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	ST[left] = ST[right] = ST[node];
+	ST[node] = -1;
+}
+
+void update(int node,int s,int e,int l,int r,int v){
+	if(l <= s && e <= r) {
+		ST[node] = v;
+		return;	
+	}
+	advance(node,s,e);
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	if(r <= m) update(left,s,m,l,r,v);
+	else if(m < l) update(right,m + 1,e,l,r,v);
+	else{
+		update(left,s,m,l,m,v);
+		update(right,m + 1,e,m + 1,r,v);
+	}
+}
+
+int query(int node,int s,int e,int p){
+	if(s == e) return ST[node];
+	advance(node,s,e);
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	if(p <= m) return query(left,s,m,p);
+	else return query(right,m + 1,e,p);
+}
+
+int main(){
+	int T;
+	scanf("%d",&T);
+	while(T--){
+		scanf("%d",&n);
+		m = 0;		
+		loop(i,n) loop(j,2) {
+			scanf("%d",&poster[i][j]),V[m++] = poster[i][j];
+			V[m++] = poster[i][0] + 1;
+		} 
+		sort(V,V + m);
+		m = unique(V,V + m) - V;
+		build(1,0,m - 1);
+		loop(i,n){
+			int l = lower_bound(V,V + m,poster[i][0]) - V;
+			int r = lower_bound(V,V + m,poster[i][1]) - V;
+			update(1,0,m - 1,l,r,i);
+		}
+		int q = 0;
+		loop(i,m) V[q++] = query(1,0,m - 1,i);
+		sort(V,V + q);
+		q = unique(V,V + q) - V;
+		q -= V[0] == -1;
+		printf("%d\n",q);
+	}	
+	return 0;
+}

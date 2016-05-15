@@ -1,0 +1,5 @@
+11060.cpp: In function ‘int main()’:
+11060.cpp:53:49: error: expected primary-expression before ‘)’ token
+     if(binary_search(all(G[ord[j - 1]]),ord[j]))) break;
+                                                 ^
+11060.cpp:53:49: error: expected ‘;’ before ‘)’ token

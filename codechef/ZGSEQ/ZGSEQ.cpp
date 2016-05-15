@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define print(A,t) cout << #A << ": "; copy(all(A),ostream_iterator<t>(cout," " )); cout << endl
+#define pi pair<int,int>
+#define point pi
+#define vi vector<int>
+#define ll long long
+#define pl pair<ll,ll>
+#define pre() cin.tie(0),cout.tie(0),ios_base::sync_with_stdio(0)
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define prp(p) cout << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cout << #A << ": "; copy(A,A + n,ostream_iterator<t>(cout," " )); cout << endl
+using namespace std;
+
+map<int,vi> M;
+
+void expand(int x,vi & V,ll & ans){
+	ll p = 1; int idx = 0;
+	while(idx < sz(V)){
+		int s = V[idx],nxt = 1 << 20;
+		if(M.find(x - 1) != M.end()) {
+			auto p = lower_bound(all(M[x - 1]),s);
+			if(p != M[x - 1].end()) nxt = *p;
+		}
+		if(M.find(x + 1) != M.end()) {
+			auto p = lower_bound(all(M[x + 1]),s);
+			if(p != M[x + 1].end()) nxt = min(nxt,*p);
+		}
+		if(nxt == (1 << 20)){
+			ans += p * (sz(V) - 1);
+			return;
+		}
+		int nidx = lower_bound(all(V),nxt) - V.begin();
+		if(nidx == sz(V)) break;
+		ll y = 0;
+		if(M.find(x - 1) != M.end()) {
+			y += lower_bound(all(M[x - 1]),V[nidx]) - V.begin();
+			y -= lower_bound(all(M[x - 1]),V[idx]) - V.begin();
+		}
+		if(M.find(x + 1) != M.end()) {
+			y += lower_bound(all(M[x + 1]),V[nidx]) - V.begin();
+			y -= lower_bound(all(M[x + 1]),V[idx]) - V.begin();
+		}		
+		p *= (nidx -0LL- idx) * p;
+		idx = nidx;
+	}
+	ans += p;
+}
+
+int main(){
+  	int T,N,a;
+	scanf("%d",&T);
+	while(T--){
+		M.clear();
+		scanf("%d",&N);
+		loop(i,N){
+			scanf("%d",&a);
+			if(M.find(a) == M.end()) M[a] = vi();
+			M[a].pb(i);
+		}
+		ll ans = N;
+		for(auto & p : M){
+			int x = p.first;
+			vi & V = p.second;
+			ll z = ans;			
+			expand(x,V,ans);
+			cerr << x << " " << ans - z << endl;		
+		}
+		printf("%lld\n",ans);
+	}
+	return 0;
+}

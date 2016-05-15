@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define print(A,t) cout << #A << ": "; copy(all(A),ostream_iterator<t>(cout," " )); cout << endl
+#define pi pair<int,int>
+#define point pi
+#define vi vector<int>
+#define ll long long
+#define pl pair<ll,ll>
+#define pre() cin.tie(0),cout.tie(0),ios_base::sync_with_stdio(0)
+#define popcnt(x) __builtin_popcount(x)
+using namespace std;
+
+pair<pi,int> tri[50];
+
+int solve(vi V){
+	int idx = 0,c = 1;
+	while(c){
+		//print(V,int);
+		c = 0;
+		loop(i,sz(V))
+		if(V[i] == 1){
+			int j = i - 1;
+			while(j != i){
+				if(j < 0) j = sz(V) - 1;
+				if(V[j]) break;
+				j--;				
+			}
+			if(j == i) return -1;
+			int k = i + 1;
+			while(k != i){
+				if(k == (int)sz(V)) k = 0;
+				if(V[k]) break;
+				k++;
+			}
+			if(k == i || k == j) return -1;
+			V[i]--;
+			V[j]--;
+			V[k]--;
+			int A[3] = {i,j,k};
+			sort(A,A + 3);
+			tri[idx].first.first = A[0] + 1;
+			tri[idx].first.second = A[1] + 1;
+			tri[idx].second = A[2] + 1;	
+			idx++;
+			c = 1;
+		}
+	}
+	if(idx != sz(V) - 2) return -1;
+	return 0;
+}
+
+
+
+int main(){
+	pre();
+	int T,K,N;
+	vi V;
+	cin >> T;
+	while(T--){
+		cin >> K >> N;
+		V.resize(N);
+		loop(i,N) cin >> V[i];
+		if(solve(V)) cout << K << " N" << endl;
+		else{
+			cout << K << " Y" << endl;
+			sort(tri,tri + N - 2);
+			loop(i,N - 2) cout << tri[i].first.first << " " << tri[i].first.second << " " << tri[i].second << endl;
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define print(A,t) cout << #A << ": "; copy(all(A),ostream_iterator<t>(cout," " )); cout << endl
+#define pi pair<int,int>
+#define point pi
+#define vi vector<int>
+#define ll long long
+#define pl pair<ll,ll>
+#define pre() cin.tie(0),cout.tie(0),ios_base::sync_with_stdio(0)
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define prp(p) cout << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cout << #A << ": "; copy(A,A + n,ostream_iterator<t>(cout," " )); cout << endl
+using namespace std;
+
+const int MAX = 3e5;
+int n,m,frog[MAX],ate[MAX];
+int frog_pos[MAX];
+ll tongue[MAX];
+ll ST[MAX << 4];
+set<pi> un_used;
+
+bool cmp(const int & a,const int & b) const {
+	return frog_pos[a] < frog_pos[b];
+}
+
+ll build(int node,int s,int e){
+	if(s == e) return ST[node] = pos[frog[s]] + tongue[frog[s]];
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	return ST[node] = max(build(left,s,m),build(right,m+1,e));
+}
+
+int query(int node,int s,int e,int x){
+	if(s == e) return s;
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	if(x <= ST[left]) return query(left,s,m,x);
+	else return query(right,m + 1,e,x);
+}
+
+void update(int node,int s,int e,int p,int v){
+	if(s == e){
+		tongue[frog[s]] += v;
+		ate[frog[s]]++;
+		ST[node] += v;
+		return;
+	}
+	int m = (s + e) >> 1,left = node << 1,right = left | 1;
+	if(p <= m) update(left,s,m,p,v);
+	else update(right,m+1,e,p,v);
+	ST[node] = max(ST[left],ST[right]);
+}
+
+int main(){
+	scanf("%d %d",&n,&m);
+	loop(i,n) scanf("%d %lld",pos + i,tongue + i),frog[i] = i;
+	sort(frog,frog + n,&cmp);
+	build(1,0,n-1);
+	loop(i,m){
+		int a,b;
+		scanf("%d %d",&a,&b);
+		int p = query(1,0,n - 1,a);
+		if(pos[p] <= a && a - pos[p] <= tongue[p]) {
+			update(1,0,n-1,p,b);
+			auto it = 
+			
+		}
+		else un_used.insert(mp(a,b));
+	}	
+	loop(i,n) printf("%d %lld\n",ate[i],tongue[i]);
+	return 0;
+}
+

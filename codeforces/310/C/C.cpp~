@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define step(i,a,b,d) for(int i = (a);i <= (b); i += d)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define len(A) A.length()
+#define vi vector<int>
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define pre() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+const int MAX = 1 << 20;
+int nxt[MAX],n,m,L;
+int cst[MAX];
+int A[MAX];
+
+int main(){
+	int ans = 0;
+	scanf("%d %d",&n,&m);
+	loop(i,n + 1) nxt[i] = i;
+	int v = 0;
+	while(m--){
+		scanf("%d",&L);
+		loop(i,L) scanf("%d",A + i);
+		reverse(A,A + L);
+		loop(i,L){
+			int j = i + 1;
+			while(j < L && A[j] + 1 == A[j - 1]) j++;
+			nxt[A[j - 1]] = A[i];
+			cst[A[j - 1]] = v;
+			v++;			
+			i = j - 1;
+		}
+	}
+	int i = 1;
+	while(i < n){
+		ans += cst[i] + 1;		
+		i = nxt[i] + 1;
+	}
+	cerr << ans << endl;
+	cout << ans << endl;
+	return 0;
+}
