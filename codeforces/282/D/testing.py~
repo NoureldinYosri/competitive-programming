@@ -1,0 +1,5 @@
+import os;
+
+def main():
+	while True:
+		os.system("./AC");

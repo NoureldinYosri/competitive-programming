@@ -32,11 +32,11 @@ int best_out[3001][10][2];
 vi G[3001];
 const int INF = 1 << 28;
 	
-
 void bfs(int s){
 	fill(&D[s][1],&D[s][n + 1],INF);
 	D[s][s] = 0;
 	queue<int> q;	q.push(s); 
+	vi ret;
 	while(!q.empty()){
 		int u = q.front(); q.pop();
 		for(int v : G[u]){

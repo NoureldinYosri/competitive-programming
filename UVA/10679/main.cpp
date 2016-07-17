@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0,_ = (n);i < _;i++)
+#define range(i,a,b) for(int i = (a),_ = (b);i <= _;i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b),_ = (a);i >= _;i--)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define vi vector<int>
+#define vl vector<long>
+#define vd vector<double>
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+struct cmp{
+	int *R,k,n;
+public:
+	cmp(){}
+	cmp(int a,int *b,int c):k(a),R(b),n(c){}
+	bool operator () (const int & a,const int & b){
+		if(k == 0) return R[a] < R[b];
+		if(R[a] != R[b]) return R[a] < R[b];
+		int u = min(a + k,n - 1),v = min(b + k,n - 1);
+		return R[u] < R[v];
+	}
+};
+
+void build(char *P,int *SA,int *R){
+	int n = strlen(P);
+	P[n++] = '$'; P[n] = 0;
+	int nR[n];
+	loop(i,n) R[i] = P[i],SA[i] = i;
+	sort(SA,SA + n,cmp(0,R,n));
+	for(int k = 1;k <= n;k <<= 1){
+		sort(SA,SA + n,cmp(k,R,n));
+		int r = 0;
+		nR[SA[0]] = r;
+		auto comparator = cmp(k,R,n);
+		loop(i,n - 1){
+			if(comparator(SA[i],SA[i + 1]) || comparator(SA[i + 1],SA[i])) r++;
+			nR[SA[i + 1]] = r;  
+		}
+		copy(nR,nR + n,R);
+	}
+	//loop(i,n) cerr << R[SA[i]] << " " << (P + SA[i]) << endl;
+	//cerr << endl;	
+}
+
+
+const int MAX = 1 << 20;
+int T,n,m;
+char S[MAX],P[MAX];
+int SA[MAX],R[MAX];
+
+bool BS(){
+	int s = 0,e = n - 1;
+	while(s < e){
+		int m = (s + e) >> 1;
+		if(strcmp(S + SA[m],P) >= 0) e = m;
+		else s = m + 1;
+	}
+	char *u = S + SA[s],*v = P;
+	for(;*v;++u,++v){
+		if(*u != *v) return 0;
+	}
+	return 1;
+}
+
+int main(){
+	scanf("%d",&T);
+	while(T--){
+		scanf("%s %d",S,&m);
+		loop(i,strlen(S)) S[i] = tolower(S[i]);
+		n = strlen(S) + 1;
+		build(S,SA,R);
+		while(m--){
+			scanf("%s",P);
+			puts(BS() ? "y" : "n");
+		}
+	}	
+	return 0;
+}

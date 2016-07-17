@@ -51,7 +51,6 @@ int solve(int i){
 		S.insert(s);
 		done[i] = 2;	
 	}
-	cerr << i << " " << solve(i + 3) << " " << can(i,3) << endl;
 	if(solve(i + 3) == 2 && can(i,3)){
 		string s = "xxx";
 		s[0] = line[i];

@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define vi vector<int>
+#define vl vector<long>
+#define vd vector<double>
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+int G[100][100],n,m,home;
+int order[12][3],idx;
+int dp[100][1 << 12];
+int task[100][1 << 12];
+
+int solve(int u,int msk){
+	if(msk == (1 << idx) - 1) return G[u][home];
+	if(dp[u][msk] != -1) return dp[u][msk];
+	dp[u][msk] = 1 << 29;
+	loop(i,idx) {
+		if(msk & (1 << i)) continue;
+		int v = order[i][0],t = order[i][1];
+		int tmp = G[u][v] + G[v][t] + solve(t,msk | (1 << i));
+		if(tmp < dp[u][msk])
+			dp[u][msk] = tmp,task[u][msk] = i;
+	}
+	return dp[u][msk];
+}
+
+
+void init(){
+	fill(&G[0][0],&G[n][0],1 << 29);
+	fill(&dp[0][0],&dp[n][0],-1);
+	loop(i,n) G[i][i] = 0;	
+}
+
+
+int main(){
+	int T;
+	scanf("%d",&T);
+	while(T--){
+		scanf("%d %d %d",&n,&m,&home); home--;
+		init();
+		while(m--){
+			int u,v,c;
+			scanf("%d %d %d",&u,&v,&c);	u--,v--;
+			G[u][v] = G[v][u] = c;
+		}
+		loop(k,n) loop(i,n) loop(j,n) G[i][j] = min(G[i][j],G[i][k] + G[k][j]);	
+		int z;
+		scanf("%d",&z),idx = 0;
+		while(z--){
+			int u,v,b;
+			scanf("%d %d %d",&u,&v,&b); --u,--v;
+			while(b--) {
+				order[idx][0] = u;
+				order[idx][1] = v;
+				order[idx][2] = G[u][v];
+				idx++;
+			}						
+		}
+		//fprintf(stderr,"%d\n",home);
+		//fprintf(stderr,"%d\n",solve(home,0));
+		fprintf(stdout,"%d\n",solve(home,0));
+	}
+	return 0;
+}

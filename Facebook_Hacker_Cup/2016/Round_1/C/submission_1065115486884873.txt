@@ -1,0 +1,25 @@
+#include<bits/stdc++.h>
+using namespace std;
+unsigned long long l=1e11,r=1e18,k=1e8,val=1,flag=0,pre=1;
+bool found=false;
+int main()
+{
+	long long l,r,k;
+	cin>>l>>r>>k;
+	int flag=0;
+	for(long long i=1;i<=1;i*=k)
+	{
+	
+		if(l<=i&&i<=r)
+		{
+			cout<<i<<" ";
+			flag=1;
+		}
+		if(i*k<i)
+		 break;
+	}
+	if(!flag)
+	cout<<-1;
+	
+	}
+}

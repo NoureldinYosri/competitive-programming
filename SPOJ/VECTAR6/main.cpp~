@@ -1,0 +1,13 @@
+#include <bits/stdc++.h>
+#define loop(i,n) {for(int i = 0,L = n;i < L;i++)}
+
+using namespace std;
+
+const int MAX = 10000000;
+ll ans = MAX + 1;
+
+
+int main(){
+
+	return 0;
+}

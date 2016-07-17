@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define rrep(i,n) for(int i = (n);i >= 0;i--)
+#define rran(i,a,b) for(int i = (b);i >= (a);i--)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) A.size()
+#define vi vector<int>
+#define vl vector<long>
+#define vd vector<double>
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+int n,A[1 << 10],B[1 << 10];
+ll SA[1 << 10],SB[1 << 10];
+pair<ll,pl> dp[1 << 10][1 << 10];
+bool vis[1 << 10][1 << 10];
+
+ll score(const pair<ll,pl> & a)  {
+	return a.xx - a.yy.xx * a.yy.xx - a.yy.yy*a.yy.yy;
+}
+
+ostream & operator << (ostream & stream ,const pair<ll,pl> & a)  {
+		stream << "{(" << a.xx << " ,(" << a.yy.xx << " ," << a.yy.yy << ")) - > " << score(a) << "}";
+		return stream;
+}
+
+
+pair<ll,pl> choose(pair<ll,pl> & a,pair<ll,pl> & b){
+	return (score(a) > score(b)) ? a : b;
+}
+
+pair<ll,pl> solve(int u,int v){
+	if(u == n) return mp(0LL,mp(0LL,SB[v]));
+	if(v == n) return mp(0LL,mp(SA[u],0LL));
+	if(vis[u][v]) return dp[u][v];
+	vis[u][v] = 1;
+	
+	dp[u][v] = solve(u + 1,v + 1); 
+	dp[u][v].xx += A[u]*B[v];
+		
+	pair<ll,pl> tmp = solve(u,v + 1);
+	tmp.yy.yy += B[v];
+	dp[u][v] = choose(dp[u][v],tmp);
+	
+	tmp = solve(u + 1,v);
+	tmp.yy.xx += A[u];
+	dp[u][v] = choose(dp[u][v],tmp);
+	
+	cerr << u << " " << v << " " << dp[u][v] << endl;
+	return dp[u][v];
+}
+
+int main(){
+	scanf("%d",&n);
+	loop(i,n) scanf("%d",A + i);
+	loop(i,n) scanf("%d",B + i);
+	for(int i = n - 1;i >= 0;i--) {
+		SA[i] = A[i] + SA[i + 1];
+		SB[i] = B[i] + SB[i + 1];
+	}
+	auto ans = solve(0,0);
+	printf("%lld\n",score(ans));
+	return 0;
+}
