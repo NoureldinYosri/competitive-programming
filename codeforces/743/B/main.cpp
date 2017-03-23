@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
+#define all(A) A.begin(),A.end()
+#define PI acos(-1)
+#define pb push_back
+#define mp make_pair
+#define sz(A) ((int)A.size())
+#define vi vector<int>
+#define vl vector<long long>
+#define vd vector<double>
+#define vp vector<pair<int,int> >
+#define ll long long
+#define pi pair<int,int>
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
+#define LSOne(x) ((x) & (-(x)))
+#define xx first
+#define yy second
+#define PQ priority_queue
+#define print(A,t) cerr << #A << ": "; copy(all(A),ostream_iterator<t>(cerr," " )); cerr << endl
+#define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
+#define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
+#define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+using namespace std;
+
+int n; 
+int get(ll k){
+	ll s = 0;
+	range(i,1,n){
+		if(2*s + 1 < k) {
+			s <<= 1;
+			s |= 1;
+		}
+		else {
+			if(s + 1 == k) return i;
+			else return get(k - s - 1);
+		}
+	}
+	assert(1 != 0);
+
+}
+
+int main(){
+	ll k;	
+	cin >> n >> k;
+	cout << get(k) << endl;
+	
+	return 0;
+}

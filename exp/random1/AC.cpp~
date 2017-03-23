@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define mp make_pair
+#define PI 3.1415926535897932384626433832
+#define MOD 1000000007
+
+/*
+*
+* Zaiiiiiin
+*
+*/
+
+using namespace std;
+
+typedef pair<int,int> ii;
+
+const int _n = 1 << 20;
+int Rank[_n], parent[_n], trees, n;
+pair<int, ii> edges[_n];
+
+void UnionFind(){
+  trees = n;
+  for(int i=0; i<n; i++){
+    Rank[i] = 1;
+    parent[i] = i;
+  }
+}
+
+int FindSet(int x){
+  if(parent[x] == x) return x;
+  return parent[x] = FindSet(parent[x]);
+}
+
+void Link(int u, int v){
+  if(Rank[u] > Rank[v]) swap(u, v);
+  parent[u] = v;
+  if(Rank[u] == Rank[v]) Rank[v]++;
+}
+
+bool SameSet(int u, int v){
+  u = FindSet(u);
+  v = FindSet(v);
+  return u == v;
+}
+
+bool UnionSet(int u, int v){
+  u = FindSet(u);
+  v = FindSet(v);
+  if(u != v){
+    Link(u, v);
+    trees--;
+  }
+  return u != v;
+}
+
+int T, a, b, w, m;
+ll ans;
+
+int main(){
+  scanf("%d", &T);
+  while(T--){
+    int cnt = 0;
+    ans = 0;
+    scanf("%d%d", &n, &m);
+    for(int i=0; i<m; i++){
+      scanf("%d%d%d", &a, &b, &w); --a,--b;
+      edges[i] = mp(w, mp(a, b));
+      ans += w;
+    }
+    sort(edges, edges + m);
+    UnionFind();
+    for(int i=0; i<m && cnt < n-1; i++){
+      if(UnionSet(edges[i].second.second, edges[i].second.first)){
+        ans -= edges[i].first;
+        cnt++;
+      }
+    }
+    printf("%lld\n", ans);
+  }
+  return 0;
+}
+

@@ -1,0 +1,53 @@
+from random import *;
+from string import *;
+from os import system;
+
+MAXN = 5;
+MAXM = 5;
+MAXA = 5;
+
+def create_test():
+	f = file("in.in","w");
+	n = randint(2,MAXN);
+	m = randint(1,min(MAXM,n*(n - 1)/2));
+	E = [];
+	for i in xrange(n):
+		for j in xrange(i):
+			e = [i+1,j+1];
+			shuffle(e);
+			E.append(e);
+	f.write("%d %d\n"%(n,m));
+	for e in E[:m]:
+		f.write("%d %d %d\n"%(e[0],e[1],randint(1,m)));
+	q = randint(1,MAXA);
+	f.write("%d\n"%q);
+	for i in xrange(q):
+		e = choice(E);
+		f.write("%d %d\n"%(e[0],e[1]));
+	f.close();
+
+def run():
+	system("./test < in.in > out.out");
+	system("./AC < in.in > correct.out");
+
+
+def is_correct():
+	system("diff out.out correct.out > err.log");
+	f = file("err.log");
+	F = [l for l in f];
+	f.close();
+	return len(F) == 0;
+
+def main():
+	i = 1;
+	while True:
+		create_test();
+		run();
+		if not is_correct():
+			print "found";
+			break;
+		print "done with %d"%i;
+		i += 1;
+
+if __name__ == "__main__":
+	main();
