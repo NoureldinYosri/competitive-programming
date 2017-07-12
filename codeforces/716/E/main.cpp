@@ -25,118 +25,135 @@
 #define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
 using namespace std;
 
-const int MAX = 100'010;
+const int MAX = 100010;
 int mod,n,m,k;
 vi E[MAX];
-int UP[MAX],DOWN[MAX];
-int color[MAX],aux[MAX];
-int p10[MAX],inv[MAX];
 int fr[MAX],to[MAX],digit[MAX];
-int siz[MAX],pref_child[MAX],dfs_in[MAX],dfs_out[MAX],dfs_time,ord[MAX];
-int cnt[MAX],depth[MAX],cnt2[MAX],aux2[MAX];
+int p10[MAX],inv[MAX];
 ll ans = 0;
-
+int visID[MAX],visid = 1;
+int mxsiz[MAX],siz[MAX];
+bool dont[MAX];
+map<int,int> out[MAX];
 
 int mul(int x,int y){
+	x %= mod;
+	y %= mod;
 	return (x*1LL*y)%mod;
 }
-int add(int x,int y){
-	x += y;
-	if(x >= mod) x -= mod;
-	if(x < 0) x += mod;
-	return x;
-}
 
-int pow_mod(int x,int p){
-	if(!p) return x%mod;
-	int y = 1;
-	for(;p > 1;p >>= 1){
-		if(p & 1) y = mul(y,x);
+int pow_mod(int x,int y){
+	if(!y) return 1;
+	int z = 1;
+	for(;y > 1;y >>= 1){
+		if(y & 1) z = mul(x,z);
 		x = mul(x,x);
 	}
-	return mul(x,y);
+	return mul(x,z);
 }
 
 int get_phi(){
-	int ret = mod;
-	int n = mod;
-	for(int i = 2;i*i <= n;i++)
-		if(n%i == 0){
+	int m = mod;
+	int ret = m;
+	for(int i = 2;i*i <= m;i++)
+		if(m%i == 0){
 			ret -= ret/i;
-			while(n%i == 0) n /= i;
+			while(m%i == 0) m /= i;
 		}
-	if(n != 1) ret -= ret/n;
+	if(m != 1) ret -= ret/m;
 	return ret;
 }
 
-int dfs(int u,int p){
-	pref_child[u] = -1;
+int dfs_cnt(int u,int p){
 	siz[u] = 1;
-	dfs_in[u] = dfs_time;
-	ord[dfs_time++] = u;
-	depth[u] = u ? (depth[p] + 1) : 0;
-	int d = depth[u];
-	for(int e : E[u]){
+	mxsiz[u] = 0;
+	for(int e : E[u]) {
 		int v = fr[e] + to[e] - u;
-		if(v == p) continue;
-		DOWN[v] = add(mul(DOWN[u],10),digit[e]);
-		UP[v] = add(UP[u],mul(digit[e],p10[d]));
-		siz[u] += dfs(v,u);
-		if(pref_child[u] == -1 || siz[v] > siz[pref_child[u]])
-			pref_child[u] = v; 
+		if(v == p || dont[v]) continue;
+		int t = dfs_cnt(v,u);
+		mxsiz[u] = max(mxsiz[u],t);
+		siz[u] += t;
 	}
-	dfs_out[u] = dfs_time - 1;
 	return siz[u];
 }
 
-void dfs(int u,int p,bool keep){
-	for(int e : E[u]){
+void get_root(int u,int p,int & root,int V){
+	mxsiz[u] = max(mxsiz[u],V - siz[u]);
+	if(root == -1 || mxsiz[u] < mxsiz[root]) root = u;
+	for(int e : E[u]) {
 		int v = fr[e] + to[e] - u;
-		if(v == p || v == pref_child[u]) continue;
-		dfs(v,u,0);
+		if(v == p || dont[v]) continue;
+		get_root(v,u,root,V);
 	}
-	if(pref_child[u] != -1) {
-		int v = pref_child[u];	
-		dfs(v,u,1);
-		for(int i = dfs_in[v];i <= dfs_out[v];i++){
-			int t = ord[i];
-			if(DOWN[u] == DOWN[t]){
-				cerr << "special " << u << " to " << t << endl;
-				ans++;
-			}
-		}
-	}
-	cnt[DOWN[u]]++;
-	cnt2[UP[u]]++;
-	for(int e : E[u]){
-		int v = fr[e] + to[e] - u;
-		if(v == p || v == pref_child[u]) continue;
-		for(int i = dfs_in[v];i <= dfs_out[v];i++){
-			int t = ord[i];
-			int x = add(UP[t], - UP[u]);
-			x = mul(x,inv[depth[u]]);
-			x = add(aux[DOWN[u]],-x);
-			if(!binary_search(aux,aux + m,x)) continue;
-			cerr << "from " << t << " up to " << u << endl;
-			ans += cnt[lower_bound(aux,aux + m,x) - aux];
-		}
-		
-		for(int i = dfs_in[v];i <= dfs_out[v];i++){
-			int t = ord[i];
-			cnt[DOWN[t]]++;
-		}
-	}
-
-	if(!keep){
-		for(int i = dfs_in[u];i <= dfs_out[u];i++){
-			int t = ord[i];
-			cnt[DOWN[t]]--;
-		}
-	}
-		
 }
 
+
+void precompute(int u,int p,ll cost,int depth,map<int,int> & save){
+	save[cost %= mod]++;
+	for(int e : E[u]) {
+		int v = fr[e] + to[e] - u;
+		if(v == p || dont[v]) continue;
+		precompute(v,u,digit[e]*1LL*p10[depth] + cost,depth + 1,save);
+	}
+}
+
+void solve(int u,int p,ll cost,int depth,map<int,int> & U,map<int,int> & V){
+	cost %= mod;
+	int target = mul(inv[depth],mod - cost);
+	if(U.find(target) != U.end()) ans += U[target];
+	if(V.find(target) != V.end()) ans -= V[target];
+	for(int e : E[u]) {
+		int v = fr[e] + to[e] - u;
+		if(v == p || dont[v]) continue;
+		solve(v,u,cost*10 + digit[e],depth + 1,U,V);
+	}
+}
+
+void divide_conquer(int u,int p){
+//	cerr << "D&C " << u << " " << p << endl;
+	int V = dfs_cnt(u,p),root = -1;
+	get_root(u,p,root,V);
+	if(root == -1) return;
+
+	u = root;
+	out[u].clear();
+	out[u][0]++;
+
+//	cerr << "root = " << root << endl;
+	dont[p] = 1;
+	for(int e : E[root]) {
+		int v = fr[e] + to[e] - root;
+		if(v == p || dont[v]) continue;
+		out[v].clear();
+		precompute(v,root,digit[e],1,out[v]);
+//		cerr << v << " : " ;
+		for(auto p : out[v]) {
+			out[u][p.xx] += p.yy;
+//			prp(p);
+		}
+//		cerr << endl;
+	}
+	ans += out[u][0] - 1;
+/*	cerr << "res : ";
+	for(auto p : out[u]) prp(p);
+	cerr << endl;
+*/	for(int e : E[root]) {
+		int v = fr[e] + to[e] - u;
+		if(v == p || dont[v]) continue;
+		solve(v,u,digit[e],1,out[u],out[v]);
+	}
+	for(int e : E[root]) {
+		int v = fr[e] + to[e] - u;
+		if(v == p || dont[v]) continue;
+		divide_conquer(v,u);
+	}
+}
+
+
 int main(){
+	#ifndef ONLINE_JUDGE
+		freopen("in.in", "r", stdin);
+	#endif
 	scanf("%d %d",&n,&mod);
 	if(mod == 1){
 		cout << n*(n - 1LL) << endl;
@@ -144,26 +161,18 @@ int main(){
 	}
 	loop(e,	n-1){
 		scanf("%d %d %d",fr + e,to + e,digit + e);
+		fr[e]++,to[e]++;
 		E[fr[e]].pb(e);
 		E[to[e]].pb(e);
+//		cerr << fr[e] << " " << to[e] << " " << digit[e] << endl;
 	}
-	p10[0] = 1;
-	loop(i,n) p10[i+1] = mul(p10[i],10);
 	int phi = get_phi();
-	loop(i,n+1) inv[i] = pow_mod(p10[i],phi-1);
 
-	dfs(0,-1);
-	loop(i,n) aux[i] = DOWN[i],aux2[i] = UP[i];
-	sort(aux,aux + n);
-	m = unique(aux,aux + n) - aux;
-	sort(aux2,aux2 + n);
-	k = unique(aux2,aux2 + n) - aux;
-	loop(i,n) {
-		DOWN[i] = lower_bound(aux,aux + m,DOWN[i]) - aux;
-		UP[i] = lower_bound(aux2,aux2 + k,UP[i]) - aux2;
-	}	
-	dfs(0,-1,1);
+	p10[0] = 1;
+	loop(i,n+5) p10[i+1] = mul(p10[i],10);
+	loop(i,n+6) inv[i] = pow_mod(p10[i],phi - 1);
+
+	divide_conquer(1,0);
 	cout << ans << endl;
-	cerr << ans << endl;	
 	return 0;
 }

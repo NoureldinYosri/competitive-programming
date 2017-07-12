@@ -1,8 +1,8 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
 #define all(A) A.begin(),A.end()
-#define PI acos(-1)
 #define pb push_back
 #define mp make_pair
 #define sz(A) ((int)A.size())
@@ -12,9 +12,8 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define point pair<double,double>
 #define pl pair<ll,ll>
-#define popcnt(x) __builtin_popcount(x)
+#define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -23,19 +22,26 @@
 #define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
 #define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
 #define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+#define what_is(x) cerr << #x << " is " << x << endl
+#define bit_lg(x) (assert(x > 0),__builtin_ffsll(x) - 1)
+const double PI = acos(-1);
 using namespace std;
 
-
-const int MAXQ = 5001,MAXN = 100'010,MAXLG = 20;
-int L[MAXQ],R[MAXQ],ord[MAXQ],m;
+const int MAXN = 100*1000 + 10,MAXQ = 5010,MAXLG = log(MAXN)/log(2) + 2;
+int L[MAXQ],R[MAXQ],n,q;
 double P[MAXQ];
-int A[MAXN],n;
-int ST[MAXN][MAXLG],lg[MAXN];
-vi G[MAXQ];
+int A[MAXN],ST[MAXN][MAXLG],lg[MAXN];
+vi adj[MAXQ];
+double dp[MAXQ][2*MAXQ + 1];
+int MAXA;
 
-void build(){
+inline int get_max(int l,int r){
+	int len = lg[r - l + 1];
+	return max(ST[l][len],ST[r - (1 << len) + 1][len]);
+}
+void build_sparse_table(){
 	lg[0] = -1;
-	loop(i,MAXN - 1) lg[i + 1] = lg[i] + ((i + 1) == LSOne(i + 1));
+	loop(i,MAXN-1) lg[i + 1] = lg[i] + ((i + 1) == LSOne(i+1));
 	loop(i,n) ST[i][0] = A[i];
 	loop(k,MAXLG-1)
 		loop(i,n){
@@ -43,49 +49,79 @@ void build(){
 			if(j >= n) j = i;
 			ST[i][k + 1] = max(ST[i][k],ST[j][k]);
 		}
+	MAXA = get_max(0,n-1);
 }
 
-double get_max(int s,int e){
-	int l = lg[e - s + 1];
-	return max(ST[s][l],ST[e - (1 << l) + 1][l]);
-}
 
-double dfs(int q){
-	sort(all(G[q]),[](const int & a,const int & b){
-		return L[a] < L[b];
-	});
-	cerr << q << " ";
-	print(G[q],int);
-	int cur = L[q] - 1;
-	double ret = 0;
-	for(int p : G[q]){
-		assert(cur <= L[p]);
-		if(cur + 1 <= L[p] - 1) ret = max(ret,get_max(cur + 1,L[p] - 1));
-		ret = max(ret,dfs(p));
-		cur = R[p];
+void read_input(){
+	scanf("%d %d",&n,&q);
+	loop(i,n) scanf("%d",A + i);
+	L[0] = 0,R[0] = n-1,P[0] = 0;
+	range(i,1,q) {
+		scanf("%d %d %lf",L + i,R + i,P + i);
+		L[i]--,R[i]--;
 	}
-	if(cur < R[q]) ret = max(ret,get_max(cur + 1,R[q]));
-	return ret + P[q];
+	q++;
+}
+
+void build_tree(){
+	vi ord; ord.reserve(q);
+	loop(i,q) ord.pb(i);
+	sort(all(ord),[](const int & a,const int & b){
+		return mp(R[a] - L[a],b) < mp(R[b] - L[b],a);
+	});
+	for(int i = 0;i < q;i++)
+		for(int j = i +1;j < q;j++) {
+			int u = ord[i],v = ord[j];
+			if(L[v] <= L[u] && R[u] <= R[v]){
+				adj[v].pb(u);
+	//			cerr << "add edge " << v << " " << u << endl;
+				break;
+			}
+		}
+}
+
+double solve(int u,int target_diff){
+	if(get_max(L[u],R[u]) > MAXA + target_diff) return 0;
+	double & ret = dp[u][target_diff + MAXQ];
+	if(ret == ret) return ret;
+	if(target_diff - 1 > - MAXQ && abs(solve(u,target_diff - 1) - 1) < 1e-15) return ret = 1;
+	ret = 0;
+	double p_choice[2] = {1-P[u],P[u]};
+	for(int choice = 0;choice <= 1;choice++){
+		if(get_max(L[u],R[u]) + choice > MAXA + target_diff) break;
+		double tmp = 1;
+		for(auto v : adj[u]){
+			double tmp2 = solve(v,target_diff - choice);
+			//if(u == 3) cerr << u << " "<< target_diff << " choice = " << choice << " v = " << v << " tmp = " << tmp2 << endl;
+			tmp *= tmp2;
+		}
+//		if(u == 3) cerr << u << " " << target_diff << " \t " << choice << " " << p_choice[choice] << " " << tmp << endl;
+		ret += p_choice[choice] * tmp;
+///		if(u == 3) cerr << "cur ret is " << ret << endl;
+	}
+	//cerr << u << " " << target_diff << " -> " << ret << endl;
+	//prArr(p_choice,2,double);
+	return ret;
 }
 
 int main(){
-	scanf("%d %d",&n,&m);
-	loop(i,n) scanf("%d",A + i);
-	build();
-	L[0] = 0,R[0] = n-1,P[0] = 0;	
-	range(i,1,m) scanf("%d %d %lf",L + i,R + i,P + i),ord[i] = i,L[i]--,R[i]--;
-	m++;
-	sort(ord,ord + m,[](const int & a,const int & b){
-		return mp(R[a] - L[a],b) < mp(R[b] - L[b],a);
-	});
-	for(int i = 0;i < m - 1;i++)
-		for(int j = i + 1;j < m;j++)
-			if(L[ord[j]] <= L[ord[i]] && R[ord[i]] <= R[ord[j]]){
-				G[ord[j]].pb(ord[i]);
-				cerr << ord[j] << " " << ord[i] << endl;
-				break;
-			}
-	cerr << dfs(0) << endl;
-				 
+	#ifndef ONLINE_JUDGE
+		freopen("in.in", "r", stdin);
+	#endif
+	read_input();
+	build_sparse_table();
+	build_tree();
+	double ans = 0,lst = 0;
+	memset(dp,-1,sizeof dp);
+	for(int diff = 0;diff <= q;diff++){
+		double p = solve(0,diff);
+	//	assert(p >= lst);
+	//	assert(p <= 1 || abs(p - 1) < 1e-15);
+		ans += (MAXA + diff) * (p - lst);
+		lst = p;
+	//	cerr << diff << " " << p << endl;
+	}
+	printf("%.10f\n",ans);
 	return 0;
 }
