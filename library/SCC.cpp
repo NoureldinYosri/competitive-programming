@@ -7,7 +7,7 @@ int SCC_id[MAXV],SCC_cnt,n;
 vi SCC[MAXV],SCC_adj[MAXV];
 
 void tarjanSCC(int u) {
-	dfs_in[u] = dfs_low[u] = u++;
+	dfs_in[u] = dfs_low[u] = dfs_time++;
 	ST.pb(u);
 	inStack[u] = true;
 	for(int e : E[u]){

@@ -1,3 +1,4 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
@@ -11,7 +12,7 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define popcnt(x) __builtin_popcount(x)
+#define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -25,40 +26,63 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAX = 100*1000 + 10;
-char txt[MAX];
 int n,m;
+char S[1 << 20];
+vi IDX[128];
+vi aux;
 
-string solve(){
-	string out ;
-	int i;
-	for(i = 0;i + m <= n;i += m){
-		out += txt[min(i + m - 1,n - 1)];
 
+
+
+void work(int x,set<int> & S,set<int> & E) {
+	while(!E.empty()){
+		auto p = E.lower_bound(x);
+		if(p == E.end()) break;
+		if(*p - x >= m) break;
+		S.erase(*p - m + 1);
+		E.erase(p);
 	}
-	if(i != n){
-		char c = txt[i];
-		for(;i < n;i++)
-			c = min(c,txt[i]);
-		out += c;
-	}
-	sort(all(out));
-	return out;
 }
 
 int main(){
-//	freopen("logger.out","w",stderr);
-	#ifndef ONLINE_JUDGE
-		freopen("input.in", "r", stdin);
-		freopen("output.out", "w", stdout);
+	#ifdef HOME
+		freopen("in.in", "r", stdin);
 	#endif
+	scanf("%d %s",&m,S);
+	n = strlen(S);
 
-	scanf("%d %s",&m,txt); n = strlen(txt);
-
-	string out = solve();
-	reverse(txt,txt + n);
-	out = min(out,solve());
+	loop(i,n) IDX[(int)(S[i] - 'a')].pb(i);
+	set<int> S,E;
+	loop(i,n-m+1) S.insert(i),E.insert(i + m - 1);
+	string out;
+	for(int c = 0;c < 26 && !S.empty();c++) {
+		vi & pos = IDX[c];
+		int ctr = 0;
+		while(!E.empty() && sz(pos) > 1) {
+			int x = pos.back(); pos.pop_back();
+			auto p = S.upper_bound(x);
+			if(p == S.begin()) {
+				ctr++;
+				continue;
+			}
+			--p;
+			if(*p > pos.back()) {
+				work(x,S,E);
+				out.pb(c + 'a');
+			}
+			else ++ctr;
+		}
+		if(!E.empty() && sz(pos) == 1) {
+			out.pb(c + 'a');
+			work(pos.back(),S,E);
+			pos.pop_back();
+		}
+		if(S.empty()) break;
+		while(ctr) {
+			--ctr;
+			out.pb(c + 'a');
+		}
+	}
 	cout << out << endl;
-	cerr << out << endl;
 	return 0;
 }

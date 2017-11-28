@@ -25,67 +25,77 @@
 const double PI = acos(-1);
 using namespace std;
 
-int A[26],n,odd;
+int A[26],n;
 
-
-string build(int & ans){
-	string ret;
-	ans = 0;
-	int di = 1,cur = 0,sum = 0;
-	loop(i,n) sum += A[i];
-	for(;sum;){
-		if(A[cur]) {
-			A[cur] -= 2;
-			sum -= 2;
-			if(sum == 0) ans++;
-			if(ret.empty()) ans++;
-			else if(ret.back() == (cur + 'a')) ans += 2;
-			ret += cur + 'a';
-		}
-		cur += di;
-		if(cur == n) cur = n-1,di *= -1;
-		else if(cur == -1) cur = 0,di *= -1;
+bool valid(int cnt,int & len){
+	len = cnt;
+	int odd = 0;
+	loop(i,n) {
+		int x = A[i]/cnt;
+		odd += x & 1;
 	}
-	string tmp = ret;
-	reverse(all(tmp));
-	ret += tmp;
-	return ret;
+	if(odd == 0) len += cnt;
+	return odd <= 1;
 }
 
+void build(int cnt){
+	if(!cnt) {
+		loop(i,n) {
+			while(A[i]--) putchar(i + 'a');
+		}
+		puts("");
+		return;
+	}
+	string s;
+	loop(i,n){
+		int x = A[i]/cnt;
+		x >>= 1;
+		while(x--) s.pb('a' + i);
+	}
+	string z = s;
+	reverse(all(z));
+	loop(i,n){
+		int x = A[i]/cnt;
+		if(x & 1) {
+			s.pb(i + 'a');
+		}
+	}
+	s += z;
+	loop(i,cnt) printf("%s",s.c_str());
+	puts("");
+}
+
+
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
 	scanf("%d",&n);
+	int g = 0;
 	loop(i,n){
 		scanf("%d",A + i);
-		odd += A[i] & 1;
+		if(A[i]) g = __gcd(g,A[i]);
 	}
-	if(n == 1){
-		printf("%d\n",A[0]);
-		loop(i,n) while(A[i]-- > 0) putchar(i + 'a');
-		puts("");
-	}
-	else if(odd > 1) {
-		puts("0");
-		loop(i,n) while(A[i]-- > 0) putchar(i + 'a');
-		puts("");
-	}
-	else if(odd == 1){
-		char c = 0;
-		loop(i,n) if(A[i] & 1) {
-			A[i] ^= 1;
-			c = i + 'a';
+	int best_len = 0,best_d = 0;
+	for(int i = 1;i*i <= g;i++)
+		if(g%i == 0){
+			int x;
+			if(valid(i,x)) {
+				if(best_d < x) {
+					best_d = i;
+					best_len = x;
+				}
+			}
+			if(valid(g/i,x)) {
+				if(best_d < x) {
+					best_d = g/i;
+					best_len = x;
+				}
+			}
 		}
-		int ans;
-		string out = build(ans);
 
-	}
-	else {
-		int ans = 0;
-		string out = build(ans);
-		cerr << ans << endl;
-		cerr << out << endl;
-	}
+	printf("%d\n",best_len);
+	build(best_d);
+
 	return 0;
 }

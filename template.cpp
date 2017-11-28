@@ -26,10 +26,11 @@ const double PI = acos(-1);
 using namespace std;
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen(fi, "r", stdin);
 		freopen(fo, "w", stdout);
 	#endif
+
 
 	return 0;
 }

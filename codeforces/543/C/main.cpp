@@ -12,7 +12,6 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define pl pair<ll,ll>
 #define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
@@ -27,47 +26,85 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAX = 20;
-ll dp[MAX+1][1 << MAX];
-char str[MAX][26];
-int cost[MAX][MAX],who[MAX][26];
-ll sum[MAX][26];
-int n,m;
-const ll oo = 1LL << 60;
-int lookup[1 << 20];
+const int MAX = 211;
+int f[MAX],g[MAX],n;
+int vis[MAX];
 
-ll solve(){
-    for(int msk = 0;msk < (1 << n);msk++) dp[m][msk] = oo;
-	dp[m][(1 << n)-1] = 0L;
-	for(int pos = m-1;pos >= 0;pos--)
-		for (int msk = (1 << n)-1;msk >= 0;msk--){
-			dp[pos][msk] = dp[pos + 1][msk];
-			ll ret = dp[pos][msk];
-			for(int omsk = ((1 << n) - 1) ^ msk,cur;omsk;omsk ^= LSOne(omsk)) {
-				cur = lookup[LSOne(omsk)];
-				ret = min(ret,dp[pos][msk | (1 << cur)] + cost[cur][pos]);
-				int c = str[cur][pos] - 'a';
-				ret = min(ret,dp[pos][msk | who[pos][c]] + sum[pos][c] - cost[cur][pos]);
-			}
-			dp[pos][msk] = ret;
+
+ll get_lcm() {
+	ll lcm = 1;
+	memset(vis,0,sizeof vis);
+	int ti = 0;
+	range(i,1,n) if(!vis[g[i]]) {
+		int cur = g[i],prv = ti;
+		while(!vis[cur]) {
+			vis[cur] = ++ti;
+			cur = g[cur];
 		}
-	return dp[0][0];
+		if(vis[cur] <= prv) continue;
+		int len = ti - vis[cur] + 1;
+		lcm *= len/__gcd(len+0LL,lcm);
+	}
+	return lcm;
+}
+
+bool inCycles(bool debug = 0){
+	memset(vis,0,sizeof vis);
+	range(i,1,n) if(!vis[g[i]]){
+		int cur = g[i];
+		while(!vis[cur]) {
+			vis[cur] = 1;
+			cur = g[cur];
+		}
+		if(cur != g[i]) return 0;
+	}
+	return 1;
+}
+
+int get_k(){
+	range(i,1,n) g[i] = i;
+	int k;
+	for(k = 1;(k==1) || !inCycles();k++) {
+		range(i,1,n) g[i] = f[g[i]];
+	//	prArr(g+1,n,int);
+	//	cerr << inCycles() << endl;
+	}
+	return k;
+}
+
+bool done(){
+	range(i,1,n) if(g[i] != g[g[i]]) return 0;
+	return 1;
+}
+
+void create(int k){
+	range(i,1,n) g[i] = i;
+	for(;k;k--) {
+		range(i,1,n) g[i] = f[g[i]];
+	}
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
-	loop(i,MAX) lookup[1 << i] = i;
-	scanf("%d %d",&n,&m);
-	loop(i,n) scanf("%s",str[i]);
-	loop(i,n) loop(j,m) scanf("%d",&cost[i][j]);
-    for(int pos = 0;pos < m;pos++)
-		for(int i = 0;i < n;i++) {
-			int c = str[i][pos] - (int)'a';
-			sum[pos][c] += cost[i][pos];
-			who[pos][c] |= 1 << i;
+	scanf("%d",&n);
+	range(i,1,n) {
+		scanf("%d",f + i);
+//		cerr << i << " " << f[i] << endl;
+	}
+	int k = get_k();
+	if(k!=1){
+		create(k-1);
+		if(done()) {
+			cout << k-1 << endl;
+			return 0;
 		}
-    cout << solve() << endl;
+	}
+	create(1);
+	ll lcm = get_lcm();
+	ll ans = ((k + lcm - 1)/lcm)*lcm;
+
+	cout << ans << endl;
 	return 0;
 }

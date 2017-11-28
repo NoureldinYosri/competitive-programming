@@ -25,28 +25,59 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAX = 300*1000 + 10;
+
+struct holder{
+	int x,cnt;
+public:
+	bool operator < (const holder & o){
+		return tie(o.cnt,x) < tie(cnt,o.x);
+	}
+};
+const int MAX = 300*1000 + 10,MAXS = 8;
 int A[MAX],n,q,m;
-vi ST[MAX*3];
+int ST[MAX*4][MAXS];
+int cnt[MAX*4];
 vi IDX[MAX];
-vi *Q[20];
-int cur[20];
-vi cand;
+holder aux[MAX];
+int B[MAX],len_aux;
+int Q[MAXS*20],len_Q;
+
+void finalize(int *A,int m,int node){
+	len_aux = 0;
+	for(int i = 0;i < m;){
+		int j = i;
+		while(j < m && A[i] == A[j]) j++;
+		aux[len_aux++] = holder({A[i],j - i});
+		i = j;
+	}
+	sort(aux,aux + len_aux);
+	for(;cnt[node] < MAXS && cnt[node] < len_aux;cnt[node]++)
+		ST[node][cnt[node]] = aux[cnt[node]].x;
+}
 
 void build(int node,int s,int e){
-	ST[node].reserve(e - s + 1);
-	for(int i = s;i <= e;i++) ST[node].pb(A[i]);
-	sort(all(ST[node]));
-	ST[node].resize(unique(all(ST[node])) - ST[node].begin());
-	if(s == e) return;
+	if(s == e) {
+		B[0] = A[s];
+		return finalize(B,1,node);
+	}
 	int m = (s + e) >> 1,left = node << 1,right = left | 1;
 	build(left,s,m);
 	build(right,m+1,e);
+	int i = s,j = m+1,idx = 0;
+	while(i <= m && j <= e) {
+		if(A[i] < A[j]) B[idx++] = A[i++];
+		else B[idx++] = A[j++];
+	}
+	while(i <= m) B[idx++] = A[i++];
+	while(j <= e) B[idx++] = A[j++];
+	assert(idx == e - s + 1);
+	copy(B,B + idx,A + s);
+	finalize(B,idx,node);
 }
 
 void query(int node,int s,int e,int l,int r){
 	if(l <= s && e <= r) {
-		Q[m++] = &ST[node];
+		for(int x : ST[node]) Q[len_Q++] = x;
 		return;
 	}
 	int m = (s + e) >> 1,left = node << 1,right = left | 1;
@@ -69,30 +100,17 @@ int main(){
 	while(q--) {
 		int l,r,k; scanf("%d %d %d",&l,&r,&k);
 		k = (r - l + 1)/k;
-		m = 0;
+		len_Q = 0;
 		query(1,1,n,l,r);
-		int ctr = m;
-		loop(i,m) {
-			cand[i] = Q[i]->at(0);
-			cur[i] = 0;
-		}
+		sort(Q,Q + len_Q);
+		len_Q = unique(Q,Q + len_Q) - Q;
 		int ans = -1;
-		while(ans == -1 && ctr) {
-			sort(cand,cand + ctr);
-			ctr = unique(cand,cand + ctr) - cand;
-			int x = cand[0],cnt = upper_bound(all(IDX[x]),r) - lower_bound(all(IDX[x]),l);
-			if(cand > k) {
+		loop(i,len_Q){
+			int x = Q[i];
+			int cnt = upper_bound(all(IDX[x]),r) - lower_bound(all(IDX[x]),l);
+			if(cnt > k) {
 				ans = x;
 				break;
-			}
-			swap(cand[0],cand[ctr-1]);
-			ctr--;
-			loop(i,m){
-				if(cur[i] < (int)Q[i]->size() && Q[i]->at(cur[i]) == x) {
-					cur[i]++;
-					if(cur[i] < (int)Q[i]->size())
-						cand[ctr++] =  Q[i]->at(cur[i]);
-				}
 			}
 		}
 		printf("%d\n",ans);

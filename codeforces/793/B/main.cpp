@@ -64,7 +64,7 @@ bool bfs(){
 
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("input.in", "r", stdin);
 		freopen("output.out", "w", stdout);
 	#endif

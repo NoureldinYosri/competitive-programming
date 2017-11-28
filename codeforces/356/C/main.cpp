@@ -1,21 +1,18 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
-#define loop(i,n) for(int i = 0,_ = (n);i < _;i++)
-#define range(i,a,b) for(int i = (a),_ = (b);i <= _;i++)
-#define rrep(i,n) for(int i = (n);i >= 0;i--)
-#define rran(i,a,b) for(int i = (b),_ = (a);i >= _;i--)
+#define loop(i,n) for(int i = 0;i < (n);i++)
+#define range(i,a,b) for(int i = (a);i <= (b);i++)
 #define all(A) A.begin(),A.end()
-#define PI acos(-1)
 #define pb push_back
 #define mp make_pair
-#define sz(A) A.size()
+#define sz(A) ((int)A.size())
 #define vi vector<int>
-#define vl vector<long>
+#define vl vector<long long>
 #define vd vector<double>
+#define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define point pair<double,double>
-#define pl pair<ll,ll>
-#define popcnt(x) __builtin_popcount(x)
+#define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -24,36 +21,74 @@
 #define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
 #define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
 #define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
+#define what_is(x) cerr << #x << " is " << x << endl
+#define bit_lg(x) (assert(x > 0),__builtin_ffsll(x) - 1)
+const double PI = acos(-1);
 using namespace std;
 
-
-vi P{2,3,5,7,11,13,17,19,23,29,31,37,41,43,47};
+int cnt[5];
 
 int main(){
-	string res;
-	int ctr = 0,v;
-	loop(i,sz(P)){
-		cout << P[i] << endl;
-		cin >> res;
-		if(res == "yes"){
-			++ctr;
-			v = P[i];
-			if(ctr == 2) {
-				cout << "composite" << endl;
-				return 0;
+	#ifdef HOME
+		freopen("in.in", "r", stdin);
+	#endif
+	int n;
+	scanf("%d",&n);
+	loop(i,n){
+		int x; scanf("%d",&x);
+		cnt[x]++;
+	}
+	int ans = 0;
+	int m = min(cnt[1],cnt[2]);
+	cnt[1] -= m;
+	cnt[2] -= m;
+	cnt[3] += m;
+	ans += m;
+//	prArr(cnt+1,4,int);
+//	cerr << m << endl;
+	if(cnt[1]) {
+		cnt[3] = min(cnt[3],2);
+		cnt[4] = min(cnt[4],2);
+		int tmp = INT_MAX;
+		for(int to3 = 0;to3 <= cnt[3] && to3 <= cnt[1];to3++){
+			for(int i = 0;i <= cnt[4];i++){
+				int c = cnt[1] - to3 + i;
+				// 3*x + 4*y = c
+				for(int x = 0;3*x <= c;x++) {
+					int y = c - 3*x;
+					if(y%4) continue;
+					y /= 4;
+					tmp = min(tmp, 2*x + 3*y + to3);
+				}
 			}
 		}
-	}
-	if(ctr){
-		if(v > 10){
-			cout << "prime" << endl;
+		if(tmp == INT_MAX) {
+			puts("-1");
 			return 0;
-		}		
-		cout << v*v << endl;
-		cin >> res;
-		if(res == "yes") cout << "composite" << endl;
-		else cout << "prime" << endl;
+		}
+		ans += tmp;
 	}
-	else cout << "prime" << endl;
+	else if(cnt[2]) {
+		int tmp = INT_MAX;
+		for(int a = 0;3*a <= cnt[2];a++){
+			int cost = 2*a;
+			int c2 = cnt[2] - 3*a;
+			cost += 2*(c2/2);
+			c2 %= 2;
+			if(c2){
+				if(cnt[4]) cost++;
+				else if(cnt[3] >= 2) cost += 2;
+				else cost = INT_MAX;
+			}
+			tmp = min(tmp,cost);
+		}
+		if(tmp == INT_MAX) {
+			puts("-1");
+			return 0;
+		}
+		ans += tmp;
+	}
+	cout << ans << endl;
+
 	return 0;
 }

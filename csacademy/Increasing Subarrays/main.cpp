@@ -1,3 +1,4 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
@@ -11,7 +12,7 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define popcnt(x) __builtin_popcount(x)
+#define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -25,75 +26,88 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAX = 1000*1000;
-ll ST[MAX << 2],LA[MAX << 2];
-int A[MAX],n;
+int n,H[1 << 20];
+ll A[1 << 20];
+int nxt[1 << 20];
+ll M;
+ll pref[1 << 20];
 
-
-pair<ll,int> get_min(pair<ll,int> a,pair<ll,int> b){
-	if(a.xx < b.xx) return a;
-	else return b;
-}
-
-
-void update(int node,int s,int e,int l,int r,ll v){
-	if(l <= s && e <= r) {
-		ST[node] += (e - s + 1LL)*v;
-		LA[node] += v;
-		return ;
+void preprocess(){
+	loop(i,n){
+		A[i] = H[i] - i;
+		pref[i] = A[i] + (i ? pref[i-1] : 0);
 	}
-	int m = (s + e) >> 1,left = node << 1,right = left | 1;
-	if(r <= m) update(left,s,m,l,r,v);
-	else if(m < l) update(right,m+1,e,l,r,v);
-	else update(left,s,m,l,m,v),update(right,m+1,e,m+1,r,v);
-	ST[node] = ST[left] + ST[right] + (e - s + 1LL)*LA[node];
+	vi ST;
+	for(int i = n-1;i >= 0;i--){
+		while(!ST.empty() && A[ST.back()] < A[i]) ST.pop_back();
+		nxt[i] = ST.empty() ? n : ST.back();
+		ST.pb(i);
+	}
+	ST.clear();
 }
 
-ll get(int node,int s,int e,int p){
-	if(s == e) return A[s] + LA[node];
-	int m = (s + e) >> 1,left = node << 1,right = left | 1;
-	if(p <= m) return get(left,s,m,p) + LA[node];
-	else return get(right,m+1,e,p) + LA[node];
-}
-
-
-ll query(int node,int s,int e,int l,int r){
-	if(l <= s && e <= r) return ST[node];
-	int m = (s + e) >> 1,left = node << 1,right = left | 1;
-	ll ret = 0;
-	if(r <= m) ret = query(left,s,m,l,r);
-	else if(m < l) ret = query(right,m+1,e,l,r);
-	else ret = query(left,s,m,l,m) + query(right,m+1,e,m+1,r);
-	ret += (r - l + 1)*LA[node];
-	return ret;
+ll brute_force(int s,int e) {
+	if(s > e) return 0;
+	ll h = H[s],ans = 0;
+	for(int i = s;i <= e;i++) {
+		ans += max(h - H[i],0LL);
+		h = max(h,H[i]+0LL);
+		h++;
+	}
+	return ans;
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
-	ll M;
-	scanf("%d %d",&n,&M);
-	loop(i,n) scanf("%d",A + i);
-	ll ans = 0;
-	int lst = 0;
-	int j = n-1;
-	for(int i = n-1;i >= 0;i--){
-		if(i != n-1 && A[i] >= lst){
-			int s = i+1,e = n-1;
-			while(s < e) {
-				int m = s + (e - s + 1)/2;
-				if(get(1,0,n-1,m) <= A[i] + m - i) s = m;
-				else e = m - 1;
+	scanf("%d %lld",&n,&M);
+	loop(i,n) scanf("%d",H + i);
+	preprocess();
+	ll ans = 0,cost = 0;
+	multiset<int> MS;
+//	prArr(nxt,n,int);
+	for(int i = 0,j = 0;i < n;i++){
+		while(j < n && cost <= M) {
+			ll tmp = cost;
+			if(!MS.empty() && *MS.rbegin() > A[j]){
+				tmp += *MS.rbegin() - A[j];
 			}
-			cerr << i << " -> " << s << endl;
-			update(1,0,n-1,i+1,s,A[i] - lst + 1);
+			if(tmp > M) {
+				j--;
+				break;
+			}
+			cost = tmp;
+			MS.insert(A[j]);
+			cerr << i << " to " << j << " cost = " << cost << endl;
+			if(cost != brute_force(i,j)) {
+				cerr << "expected " << brute_force(i,j) << " found " << cost << endl;
+			}
+			assert(cost == brute_force(i,j));
+//			print(MS,int);
+			j++;
 		}
-		lst = A[i];
-		while (i < j && query(1,0,n-1,i,j) > M) j--;
+		j = min(j,n-1);
+//		cerr << i << " " << j << endl;
+		assert(j >= i);
+		assert(cost == brute_force(i,j));
 		ans += j - i + 1;
-		cerr << i << " " << j << " " << query(1,0,n-1,i,j) << endl;
+		if(nxt[i] <= j) {
+			cerr << "left was " << A[i] << " nxt wall is " << nxt[i] << " with " << A[nxt[i]] << endl;
+			ll contrib = A[i]*(nxt[i]-i-1LL) - (pref[nxt[i]-1] - pref[i]);
+			cost -= contrib;
+			assert(contrib == brute_force(i,nxt[i]-1));
+		}
+		else {
+			cost -= A[i]*(j-i+0LL) - (pref[j] - pref[i]);
+		}
+		assert(sz(MS) == j-i+1);
+		assert(MS.find(A[i]) != MS.end());
+		MS.erase(MS.find(A[i]));
+		assert(cost == brute_force(i+1,j));
+		j++;
 	}
+	ans += n - 2;
 	cout << ans << endl;
 	return 0;
 }
