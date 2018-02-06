@@ -1,3 +1,4 @@
+//WA
 #pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
@@ -49,7 +50,7 @@ void flood_fill(int u,int idx){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
 
@@ -136,11 +137,11 @@ int main(){
 			}
 			double tmp = dist[snk][0];
 			ans = min(ans,tmp);
-			cerr << h << " -> " << tmp << endl;
+//			cerr << h << " -> " << tmp << endl;
 		}
-	//	printf("Case %d: ",t);
-	//	if(ans >= oo) puts("impossible");
-	//	else printf("%.3f\n",ans);
+		printf("Case %d: ",t);
+		if(ans >= oo) puts("impossible");
+		else printf("%.3f\n",ans);
 	}
 	return 0;
 }

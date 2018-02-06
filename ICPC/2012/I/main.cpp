@@ -221,7 +221,7 @@ int solve(pi & pos,ll & cnt){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
 	for(int t = 1,m,n;scanf("%d %d %d %d",&R,&C,&m,&n) == 4;t++){

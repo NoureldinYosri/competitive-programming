@@ -12,7 +12,6 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define pl pair<ll,ll>
 #define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
@@ -27,166 +26,82 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAXN = 10*1000,MAX = 1 << 24,num_bits = 24;
-string str[MAXN];
-int ans[MAX],n;
-int f[MAX],g[MAX],psi[24][MAX >> 12];
-unordered_map<int,int> lookup;
+const int NUMBITS = 24,MAX = 1 << NUMBITS;
+int n;
+int f[MAX];
+int S[MAX];
+int g[MAX];
 
-void read_input(){
-	scanf("%d",&n);
-	char buffer[5];
-	loop(i,n) {
-		scanf("%s",buffer);
-		str[i] = string(buffer);
-		sort(all(str[i]));
-		str[i].resize(unique(all(str[i])) - str[i].begin());
-	}
-}
-int brute_force(int msk){
-	int ret = 0;
-	for (int i = 0;i < n;i++) {
-		int cur = 0;
-		for (char c : str[i]) cur |= 1 << (c - 'a');
-		if ((cur & msk) != 0)
-			ret++;
-	}
-	return ret;
-}
-void count1(){
-	for (int i = 0;i < n;i++){
-		int first = -1,second = -1,third = -1;
-		for (char c : str[i]) {
-			int k = c - 'a';
-			if (first == -1) first = k;
-			else if(second == -1) second = k;
-			else third = k;
-		}
-		if(first != -1) f[1 << first]++;
-		if(second != -1) f[1 << second]++;
-		if(third != -1) f[1 << third]++;
-	}
-	for (int msk = 0;msk < (1 << num_bits);msk++)
-		for(int omsk = msk;omsk;omsk ^= LSOne(omsk))
-			ans[msk] += f[LSOne(omsk)];
-}
-
-void count2(){
-	memset(f,0,sizeof f);
-	for (int i = 0;i < n;i++){
-		int first = -1,second = -1,third = -1;
-		for (char c : str[i]) {
-			int k = c - 'a';
-			if (first == -1) first = k;
-			else if(second == -1) second = k;
-			else third = k;
-		}
-		if(second != -1) f[(1 << first) | (1 << second)]++;
-		if(third != -1) {
-			f[(1 << first) | (1 << third)]++;
-			f[(1 << second) | (1 << third)]++;
+void SOS(){
+	for(int b = 0;b < NUMBITS;b++){
+		for(int i = 0;i < MAX;i++) {
+			if(i & (1 << b)) f[i] += f[i ^ (1 << b)];
 		}
 	}
-
-	for(int right = 0;right < (1 << 12);right++) {
-		int msk = right;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				g[msk] += f[LSOne(msk1) | LSOne(msk2)];
-	}
-	for(int left = 0;left < (1 << 12);left++) {
-		int msk = left << 12;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				g[msk] += f[LSOne(msk1) | LSOne(msk2)];
-	}
-
-
-	for (int msk = 0;msk < (1 << num_bits);msk++){
-		int left = msk & 0xFFF000,right = msk & 0xFFF;
-		ans[msk] -= g[left];
-		ans[msk] -= g[right];
-		for(int lm = left;lm;lm ^= LSOne(lm))
-			for(int rm = right;rm;rm ^= LSOne(rm))
-				ans[msk] -= f[LSOne(lm) | LSOne(rm)];
-	}
+	for(int i = 0;i < MAX;i++)
+		g[i] += f[i];
 }
 
-void count3(){
-	memset(f,0,sizeof f);
-	memset(g,0,sizeof g);
-	for (int i = 0;i < n;i++){
-		int first = -1,second = -1,third = -1;
-		for (char c : str[i]) {
-			int k = c - 'a';
-			if (first == -1) first = k;
-			else if(second == -1) second = k;
-			else third = k;
-		}
-		if(third != -1) f[(1 << first) | (1 << second) | (1 << third)]++;
+string toString(int msk) {
+	string s;
+	int i = 0;
+	while(msk) {
+		int b = LSOne(msk);
+		while((1 << i) != b) i++;
+		s += 'a' + i;
+		msk ^= b;
 	}
-	for(int right = 0;right < (1 << 12);right++) {
-		int msk = right;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				for(int msk3 = msk2 ^ LSOne(msk2);msk3;msk3 ^= LSOne(msk3))
-					g[msk] += f[LSOne(msk1) | LSOne(msk2) | LSOne(msk3)];
-	}
-	for(int left = 0;left < (1 << 12);left++) {
-		int msk = left << 12;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				for(int msk3 = msk2 ^ LSOne(msk2);msk3;msk3 ^= LSOne(msk3))
-					g[msk] += f[LSOne(msk1) | LSOne(msk2) | LSOne(msk3)];
-	}
-
-	for(int right = 0;right < (1 << 12);right++) {
-		int msk = right;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				for(int left = 12;left < 24;left++)
-					psi[left][right] += f[LSOne(msk1) | LSOne(msk2) | (1 << left)];
-	}
-	for(int left = 0;left < (1 << 12);left++) {
-		int msk = left << 12;
-		for(int msk1 = msk;msk1;msk1 ^= LSOne(msk1))
-			for(int msk2 = msk1 ^ LSOne(msk1);msk2;msk2 ^= LSOne(msk2))
-				for(int right = 0;right < 12;right++)
-					psi[right][left] += f[LSOne(msk1) | LSOne(msk2) | (1 << right)];
-	}
-
-	for (int msk = 0;msk < (1 << num_bits);msk++){
-		int left = msk & 0xFFF000,right = msk & 0xFFF;
-		ans[msk] += g[left];
-		ans[msk] += g[right];
-		for(int r = right;r;r ^= LSOne(r))
-			ans[msk] += psi[lookup[LSOne(r)]][left >> 12];
-		for(int l = left;l;l ^= LSOne(l))
-			ans[msk] += psi[lookup[LSOne(l)]][right];
-	}
-
+	return s;
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
-	loop(i,24) lookup[1 << i] = i;
-	read_input();
-	count1();
-	count2();
-	count3();
-	//prArr(ans,(1 << num_bits),int);
-	int out = 0;
-	/*loop(msk,(1 << 24)) {
-		int a = ans[msk],b = brute_force(msk);
-		if(a != b) {
-			cerr << "failed on " << msk << " expected " << b << " found " << a << endl;
-			return 0;
+	scanf("%d",&n);
+	loop(i,n) {
+		char buffer[4]; scanf("%s",buffer);
+		int m = strlen(buffer);
+		sort(buffer,buffer + m);
+		m = unique(buffer,buffer + m) - buffer;
+		buffer[m] = 0;
+		for(char c : string(buffer))
+			S[i] |= 1 << (c - 'a');
+	}
+
+	for(int i = 0;i < n;i++){
+		string s = toString(S[i]);
+		for(char c : s)
+			f[1 << (c - 'a')]++;
+	}
+	SOS();
+
+	memset(f,0,sizeof f);
+	for(int i = 0;i < n;i++){
+		string s = toString(S[i]);
+		for(int j = 0;j < sz(s);j++)
+			for(int k = 0;k < j;k++) {
+				int a = s[j] - 'a',b = s[k] - 'a';
+				f[(1 << a) | (1 << b)]--;
+			}
+	}
+	SOS();
+
+	memset(f,0,sizeof f);
+	for(int i = 0;i < n;i++){
+		string s = toString(S[i]);
+		if(sz(s) == 3) {
+			int msk = 0;
+			for(char c : s)
+				msk |= 1 << (c - 'a');
+			f[msk]++;
 		}
-	}*/
-	//prArr(ans,(1 << 4),int);
-	loop(msk,(1 << 24)) out ^= ans[msk]*ans[msk];
-	cout << out << endl;
+	}
+	SOS();
+
+
+	ll ans = 0;
+	loop(i,MAX) ans ^= g[i] * 1LL * g[i];
+	cout << ans << endl;
 	return 0;
 }

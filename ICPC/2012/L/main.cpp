@@ -77,9 +77,8 @@ int solve(){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
-		freopen("out.out", "w", stdout);
 	#endif
 	for(int t = 1;scanf("%d %d",&n,&m) == 2;t++){
 		loop(i,n) scanf("%lld",A + i);

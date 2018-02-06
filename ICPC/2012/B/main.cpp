@@ -43,8 +43,8 @@ void preprocess(){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
-		freopen("input.in", "r", stdin);
+	#ifdef HOME
+		freopen("in.in", "r", stdin);
 	#endif
 	for(int t = 1;scanf("%d",&n) == 1;t++){
 		memset(A,0,sizeof A);

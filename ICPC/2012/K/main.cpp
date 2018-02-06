@@ -77,7 +77,7 @@ void preprocess(){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
+	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	//	freopen("out.out", "w", stdout);
 	#endif

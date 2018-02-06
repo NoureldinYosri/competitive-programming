@@ -52,22 +52,8 @@ vi greedy(){
 	}
 	vis = vi(n,0);
 	taken = vi(n,0);
+	sort(all(ret));
 	return ret;
-}
-
-bool impossible(int rem){
-	static vi aux;
-	aux.clear();
-	int need = 0;
-	loop(i,n) {
-		if(!taken[i]) aux.pb(sz(G[i]) + 1);
-		need += !vis[i];
-	}
-	sort(all(aux));
-	reverse(all(aux));
-	int s = 0;
-	loop(i,rem) s += aux[i];
-	return s < need;
 }
 
 bool bt(vi & V,int len){
@@ -76,23 +62,22 @@ bool bt(vi & V,int len){
 		loop(i,n) all_covered &= vis[i] > 0;
 		return all_covered;
 	}
-	//if(impossible(len)) return 0;
-	for(int u = (V.empty() ? -1 : V.back()) + 1;u < n;u++){
-		V.pb(u);
-		for(int v : G[u]) vis[v]++;
-		vis[u]++;
+	for(int i = V.empty() ? 0 : (V.back()+1);i < n;i++) {
+		vis[i]++;
+		V.pb(i);
+		for(int x : G[i]) vis[x]++;
 		if(bt(V,len - 1)) return 1;
-		vis[u]--;
-		for(int v : G[u]) vis[v]--;
+		for(int x : G[i]) vis[x]--;
 		V.pop_back();
+		vis[i]--;
 	}
 	return 0;
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
-		freopen("input.in", "r", stdin);
-	#endif
+#ifdef HOME
+	freopen("in.in","r",stdin);
+#endif
 	for(int t = 1;scanf("%d",&n) == 1;t++){
 		char buffer[80];
 		loop(i,n) G[i].clear();

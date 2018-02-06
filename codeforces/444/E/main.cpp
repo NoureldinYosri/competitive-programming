@@ -1,3 +1,4 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
@@ -25,107 +26,150 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAXN = 3000*2 + 2 + 5;
-int node_cnt,src,snk;
-int capa[MAXN][MAXN],parent[MAXN];
-vi adj[MAXN];
 
-void init(int _cnt,int _src,int _snk){
-	node_cnt = _cnt;
+const int maxnode = 3000*2 + 5;
+const int maxedge = (3000*3000 + 2*3000 + 10)*2;
+const int oo = 1000000000;
+int node, src, dest, nedge;
+short point[maxedge], flow[maxedge], capa[maxedge];
+int head[maxnode],nxt[maxedge];
+int dist[maxnode], Q[maxnode], work[maxnode];
+
+void init(int _node, int _src, int _dest) {
+	node = _node;
 	src = _src;
-	snk = _snk;
-	memset(capa,0,sizeof capa);
-	loop(i,node_cnt) adj[i].clear();
+	dest = _dest;
+	for (int i = 0; i < node; i++)
+		head[i] = -1;
+	nedge = 0;
 }
-
-void addedge(int fr,int to,int c1,int c2){
-	capa[fr][to] += c1;
-	capa[to][fr] += c2;
-	adj[fr].pb(to);
-	adj[to].pb(fr);
+void addedge(int u, int v, int c1, int c2) {
+	point[nedge] = v, capa[nedge] = c1, flow[nedge] = 0,
+	nxt[nedge] = head[u], head[u] =(nedge++);
+	point[nedge] = u, capa[nedge] = c2, flow[nedge] = 0,
+	nxt[nedge] = head[v], head[v] =(nedge++);
 }
-
-
-bool bfs(){
-	queue<int> q;
-	q.push(src);
-	memset(parent,-1,sizeof parent);
-	parent[src] = -2;
-	while(!q.empty()){
-		int u = q.front(); q.pop();
-		if(u == snk) return 1;
-		for(int v : adj[u]) if(capa[u][v]) if(parent[v] == -1){
-			parent[v] = u;
-			q.push(v);
+bool dinic_bfs() {
+	memset(dist, 255, sizeof(dist));
+	dist[src] = 0;
+	int sizeQ = 0;
+	Q[sizeQ++] = src;
+	for (int cl = 0; cl < sizeQ; cl++)
+		for (int k = Q[cl], i = head[k]; i >= 0; i = nxt[i])
+			if (flow[i] < capa[i] && dist[point[i]] < 0) {
+				dist[point[i]] = dist[k] + 1;
+				Q[sizeQ++] = point[i];
+			}
+	return dist[dest] >= 0;
+}
+int dinic_dfs(int x, int exp) {
+	if (x == dest)
+		return exp;
+	for (int &i = work[x]; i >= 0; i = nxt[i]) {
+		int v = point[i], tmp;
+		if (flow[i] < capa[i] && dist[v] == dist[x] + 1 && (tmp = dinic_dfs(v, min(exp, capa[i] - flow[i]))) > 0) {
+			flow[i] += tmp;
+			flow[i ^ 1] -= tmp;
+			return tmp;
 		}
 	}
 	return 0;
 }
-
-void augment(){
-	static vi path;
-	path.clear();
-	int cur = snk;
-	while(cur != -2) {
-		path.pb(cur);
-		cur = parent[cur];
+int dinic_flow() {
+	int result = 0;
+	while (dinic_bfs()) {
+		for (int i = 0; i < node; i++)
+			work[i] = head[i];
+		while (1) {
+			int delta = dinic_dfs(src, oo);
+			if (delta == 0)
+				break;
+			result += delta;
+		}
 	}
-	reverse(all(path));
-	for(int i = 0;i + 1 < sz(path);i++){
-		int u = path[i],v = path[i + 1];
-		capa[u][v] --;
-		capa[v][u] ++;
-	}
+	return result;
 }
 
-int maxflow(){
-	int f = 0;
-	while(bfs()) {
-		f++;
-		augment();
-	}
-	return f;
+
+
+
+
+const int MAXN = 3000,MAXV = 2*MAXN + 2;
+short W[MAXN],n,N;
+int F[MAXN],T[MAXN],C[MAXN],ord[MAXN];
+int id[MAXN],dsuW[MAXN];
+list<int> cont[MAXN];
+
+void init(){
+	loop(i,n) addedge(0,i+1,1,0);
+	loop(i,n) addedge(i+n+1,N-1,W[i],0);
 }
 
-int tree_dist[3001][3001];
-int tree_n;
-vp G[3001];
-int lim[3001];
-
-void dfs(int u,int p,int src){
-	for(auto e : G[u]) if(e.xx != p) {
-		tree_dist[src][e.xx] = max(tree_dist[src][u] , e.yy);
-		dfs(e.xx,u,src);
-	}
+int find(int a){
+	return id[a] = (a == id[a]) ? a : find(id[a]);
 }
 
-void build_graph(int Th){
-	int src = 0,snk = 2*tree_n + 1;
-	init(2*tree_n+2,src,snk);
-	range(i,1,tree_n) addedge(src,i,lim[i],0);
-	range(i,1,tree_n) range(j,1,tree_n) if(tree_dist[i][j] >= Th) addedge(i,j+tree_n,1,0);
-	range(i,1,tree_n) addedge(i+tree_n,snk,1,0);
+void join(int a,int b) {
+	a = find(a),b = find(b);
+	if(a == b) return;
+	if(dsuW[a] < dsuW[b]) swap(a,b);
+	for(int x : cont[a])
+		for(int y : cont[b]){
+			addedge(x+1,y+n+1,1,0);
+			addedge(y+1,x+n+1,1,0);
+			cerr << x+1 << " " << y+n+1 << endl;
+			cerr << y+1 << " " << x+n+1 << endl;
+		}
+
+
+	cont[a].splice(cont[a].end(),cont[b]);
+	assert(cont[b].size() == 0);
+	dsuW[a] += dsuW[b];
+	id[b] = a;
 }
 
 int main(){
 	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
-	scanf("%d",&tree_n);
-	loop(i,tree_n-1){
+	scanf("%hd",&n);
+	N = 2*n + 2;
+	loop(e,n-1) {
 		int a,b,c; scanf("%d %d %d",&a,&b,&c);
-		G[a].pb(mp(b,c));
-		G[b].pb(mp(a,c));
+		--a,--b;
+		F[e] = a;
+		T[e] = b;
+		C[e] = c;
+		ord[e] = e;
 	}
-	range(i,1,tree_n) scanf("%d",lim + i);
-	range(i,1,tree_n) dfs(i,0,i);
-	int s = 0,e = 10000;
-	while(s < e) {
-		int m = s + (e - s + 1)/2;
-		build_graph(m);
-		if(maxflow() == tree_n) s = m;
-		else e = m - 1;
+	loop(i,n) scanf("%hd",W + i);
+
+
+	sort(ord,ord + n - 1,[](const int & a,const int & b) {
+		return C[a] < C[b];
+	});
+	reverse(ord,ord + n - 1);
+
+	loop(i,n) dsuW[i] = 1,id[i] = i,cont[i].push_back(i);
+
+
+	init(N,0,N-1);
+	init();
+	int f = 0,ans = -1;
+	for(int i = 0;i + 1 < n;) {
+		int j = i;
+		cerr << "W: " << C[ord[i]] << endl;
+		while(j + 1 < n && C[ord[i]] == C[ord[j]]) {
+			join(F[ord[j]],T[ord[j]]);
+			j++;
+		}
+		f += dinic_flow();
+		if(f == n) {
+			ans = C[ord[i]];
+			break;
+		}
+		i = j;
 	}
-	cout << s << endl;
+	cout << ans << endl;
 	return 0;
 }

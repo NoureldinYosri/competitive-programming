@@ -26,128 +26,99 @@
 const double PI = acos(-1);
 using namespace std;
 
-const int MAX = 1000*1000 + 10,MAXLG = 24,CNT = 3;
-int n,k,K;
-pi P[CNT*MAX];
-int to[CNT*MAX];
-int ST[CNT*MAX][MAXLG],lg[CNT*MAX];
+int n,K;
+vp P;
+pi best[2 << 20];
 
-int argmax(int a,int b) {
-	return (mp(to[a],-a) > mp(to[b],-b)) ? a : b;
+ostream& operator << (ostream & st,const pi & p) {
+	st << "(" << p.xx << ", " << p.yy << ")";
+	return st;
 }
+
+inline void insert(pi p,vp & window) {
+	while(!window.empty() && p.yy >= window.back().yy) window.pop_back();
+	window.pb(p);
+}
+
+bool better(pi a,pi b) {
+	return a.yy < b.yy;
+}
+
 void preprocess(){
-	loop(i,K){
-		int a = P[i].xx, b = P[i].yy;
-		to[a] = max(to[a],b);
+	for(auto p : P){
+		if(better(best[p.xx],p))
+			best[p.xx] = p;
 	}
-//	prArr(to+1,2*n,int);
-	lg[0] = -1;
-	for(int i = 1;i < CNT*MAX;i++)
-		lg[i] = lg[i-1] + (i == LSOne(i));
-	range(i,1,CNT*n) ST[i][0] = to[i] ? i : 0;
-	loop(q,MAXLG-1)
-		range(i,1,CNT*n) {
-			int j = i + (1 << q);
-			if(j > 2*n) j = i;
-			ST[i][q + 1] = argmax(ST[i][q],ST[j][q]);
+	for(int i = 1;i <= 2*n + 1;i++){
+		if(better(best[i],best[i-1]))
+			best[i] = best[i - 1];
+	}
+}
+
+void fix(deque<pi> & used,int st,int en,int & covered) {
+	static vp aux;
+	int cur = st-1;
+	while(!used.empty() && used.front().yy < st) used.pop_front();
+
+	while(!used.empty() && better(used.front(),best[cur + 1])) {
+		used.pop_front();
+		aux.push_back(best[cur + 1]);
+		cur = best[cur + 1].yy;
+		if(cur >= en) {
+			used.clear();
+			break;
 		}
-}
-
-
-int RMQ(int s,int e){
-	if(s > e) return 0;
-	int l = lg[e - s + 1];
-	return argmax(ST[s][l],ST[e - (1 << l) + 1][l]);
-}
-
-
-inline int getNext(int cur) {
-	int nxt = RMQ(cur,to[cur]);
-	if(to[to[cur]+1] && to[to[cur] + 1] >= to[nxt]) nxt = to[cur]+1;
-	if(nxt == cur) cur = nxt = 0;
-	return nxt;
+	}
+	reverse(all(aux));
+	for(auto p : aux) used.push_front(p);
+	aux.clear();
+	covered = max(covered,cur);
 }
 
 int main(){
 	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
-	scanf("%d %d",&n,&k);
-	K = k;
-
-	loop(i,k) {
-		scanf("%d %d",&P[i].xx,&P[i].yy);
-		if(P[i].xx > P[i].yy){
-			P[i].yy += n ;
-			P[K++] = mp(P[i].xx + n,P[i].yy + n);
+	scanf("%d %d",&n,&K);
+	P.reserve(2*K);
+	for(int i = 0;i < K;i++) {
+		int a,b; scanf("%d %d",&a,&b);
+		if(a <= b) {
+			P.push_back(mp(a,b));
+			P.push_back(mp(a+n,b+n));
 		}
-		else{
-			P[K++] = mp(P[i].xx + n,P[i].yy+n);
-//			P[K++] = mp(P[i].xx + 2*n,P[i].yy+2*n);
-		}
+		else
+			P.push_back(mp(a,b + n));
 	}
+	sort(all(P));
 	preprocess();
-
-	int ans = INT_MAX;
-	vi aux;
-	deque<int> dq;
-	for(int i = 1;i <= CNT*n;i++) if(to[i]){
-
-		if(!dq.empty()){
-			int cur = i;
-			aux.pb(i);
-			while(cur && to[cur]+1 < dq.front()){
-				int nxt = getNext(cur);
-				cur = nxt;
-				if(!nxt) break;
-				aux.pb(nxt);
-				cur = nxt;
+	vp window;
+	deque<pi> used;
+	int ans = INT_MAX,en;
+	for(int st = 1,covered = 0,j = 0;st <= n;st++) {
+		covered = max(covered,st-1);
+		en = st + n - 1;
+		fix(used,st,en,covered);
+		window.clear();
+		do{
+			while(covered < en && j < sz(P) && P[j].xx <= covered + 1) {
+				insert(P[j],window);
+				j++;
 			}
-			if(!cur) {
-				aux.clear();
-				continue;
+			if(!window.empty()) {
+				covered = max(covered,window[0].yy);
+				used.pb(window[0]);
 			}
-			while(!dq.empty() && getNext(aux.back()) && getNext(aux.back()) != dq.front() && to[getNext(aux.back())] < n+i-1){
-				int a = dq.front(),b = getNext(aux.back()) ;
-//				cerr << "replacing " << a << " with " << b << endl;
-//				cerr << "reach was " << to[a] << " became " << to[b] << endl;
-				dq.pop_front();
-				aux.pb(b);
-			}
-//			cerr << i << endl;
-//			print(aux,int);
-//			print(dq,int);
-			while(!aux.empty()) {
-				if(dq.empty() || aux.back() != dq.front())
-					dq.push_front(aux.back());
-				aux.pop_back();
-			}
-		}
-		else {
-			dq.pb(i);
-		}
-
-
-//		cerr << "==========================" << endl;
-//		print(dq,int);
-		int cur = dq.back();
-		while(to[cur] < i+n-1) {
-			int nxt = RMQ(cur,to[cur]);
-//			cerr << cur << " " << nxt << " " << to[nxt]  << " " << to[cur +1 ] << endl;
-			if(to[to[cur]+1] && to[to[cur] + 1] > to[nxt]) nxt = to[cur]+1;
-			if(nxt == cur) break;
-			dq.pb(nxt);
-			cur = nxt;
-		}
-
-		if(to[dq.back()] >= i + n-1)
-			ans = min(ans,sz(dq));
-//		print(dq,int);
-		assert(dq.front() == i);
-		dq.pop_front();
+		}while(covered < en && j < sz(P) && P[j].xx <= covered + 1);
+//		cerr << sz(used) << " [" << st << ", " << en << "] " << " " << covered << " " << P[j].xx << endl;
+//		for(auto p : used) {
+//			prp(p);
+//		}
+//		cerr << endl;
+		if(covered >= en)
+			ans = min(ans,sz(used));
 	}
-
-	if(ans == INT_MAX) puts("impossible");
-	else cout << ans << endl;
+	if(ans >= INT_MAX) puts("impossible");
+	else printf("%d\n",ans);
 	return 0;
 }

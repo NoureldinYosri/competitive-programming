@@ -96,8 +96,8 @@ ll solve(int n){
 }
 
 int main(){
-	#ifndef ONLINE_JUDGE
-		freopen("input.in", "r", stdin);
+	#ifdef HOME
+		freopen("in.in", "r", stdin);
 	#endif
 	for(int N,t = 1;scanf("%d %s",&N,P) == 2;t++){
 		preprocess();
