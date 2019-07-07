@@ -113,10 +113,7 @@ int n,m,k;
 char U[1 << 20],V[1 << 20];
 num IA[MAX],OA[MAX],IB[MAX],OB[MAX],IC[MAX],OC[MAX];
 
-int main(){
-	#ifndef ONLINE_JUDGE
-		freopen("in.in", "r", stdin);
-	#endif
+void old(){
 	cin >> n >> m >> k >> U >> V;
 	string alpha = "ATGC";
 	vi cnt(n,0);
@@ -150,5 +147,55 @@ int main(){
 	int ctr = 0;
 	for(int x : cnt) ctr += x == m;
 	cout << ctr << endl;
+}
+
+void New(){
+	cin >> n >> m >> k >> U >> V;
+	string alpha = "ATGC";
+	vi cnt(n,0),aux(n,0);
+	int N = n;
+	while(N != LSOne(N)) N++;
+	N <<= 1;
+	for(char c : alpha){
+		int target = 0;
+		for(char cv : V) target += c == cv;
+		fill(IA,IA + N,zero);
+		fill(IB,IB + N,zero);
+		loop(i,n) {
+			if(U[i] == c)
+				IA[i] = one;
+		}
+//		print(A,num);
+		loop(i,m) if(V[i] == c) IB[m - 1 - i] = one;
+		fft(IA,OA,0,N);
+		fft(IB,OB,0,N);
+		loop(i,N) IC[i] = OA[i]*OB[i];
+		fft(IC,OC,1,N);
+		for(int i = m-1,j = 0;j <= n-m;i++,j++) {
+			int v = round(OC[i].real);
+			cnt[j] += v;
+		}
+//		print(cnt,int);
+		for(int i = 1;i < n;i++)
+			cnt[i] += cnt[i - 1];
+		for(int i = 0;i < n;i++) {
+			int r = min(n-1,i+k);
+			int l = max(0,i-k);
+			int s = cnt[r] - (l ? cnt[l - 1] : 0);
+			aux[i] += s >= target;
+		}
+		fill(all(cnt),0);
+	//	prArr(OC,N,num);
+	}
+	int ctr = 0;
+	for(int i = 0;i <= n-m;i++) ctr += aux[i] == 4;
+	cout << ctr << endl;
+}
+
+int main(){
+	#ifndef ONLINE_JUDGE
+		freopen("in.in", "r", stdin);
+	#endif
+	New();
 	return 0;
 }

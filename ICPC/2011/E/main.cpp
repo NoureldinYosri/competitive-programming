@@ -1,3 +1,4 @@
+#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
@@ -6,12 +7,11 @@
 #define mp make_pair
 #define sz(A) ((int)A.size())
 #define vi vector<int>
-#define vl vector<long long>
 #define vd vector<double>
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define popcnt(x) __builtin_popcount(x)
+#define popcnt(x) __builtin_popcountll(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -22,94 +22,128 @@
 #define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
 #define what_is(x) cerr << #x << " is " << x << endl
 #define bit_lg(x) (assert(x > 0),__builtin_ffsll(x) - 1)
-const double PI = acos(-1);
 using namespace std;
 
+const int MAX = 7000+5;
+int H,W,n,Q;
+pi P[1 << 20];
+int mx,x,y;
+int offset[MAX][MAX];
 
-const int MAX = 5*100*1000 + 10;
-const int MAXST = MAX*20;
-pi P[MAX];
-int n;
-int X,Y,Q;
-int siz[MAXST],L[MAXST],R[MAXST],N;
-int T[MAX];
-
-void build(int node,int s,int e){
-	siz[node] = L[node] = R[node] = 0;
-	N = node;
-	if(s == e) return;
-	int m = (s + e) >> 1,left = 2*node + 1,right = left + 1;
-	build(left,s,m);
-	build(right,m+1,e);
+bool read(){
+	scanf("%d %d %d %d",&W,&H,&n,&Q);
+	return !(W==0 && H==0 && n==0 && Q==0);
 }
 
 
-int update(int node,int s,int e,int p){
-	int cur = ++N;
-	siz[cur] = siz[node];
-	L[cur] = L[node];
-	R[cur] = R[node];
-	siz[cur]++;
-	if(s == e) return cur;
-	int m = s + (e - s)/2;
-	if(p <= m) L[cur] = update(L[cur],s,m,p);
-	else R[cur] = update(R[cur],m+1,e,p);
-	return cur;
+pair<pi,pi> squares[1 << 20];
+
+bool inside(int x,int y) {
+	return 1 <=x && x <= W && 1 <= y && y <= H;
 }
 
-int query(int u,int v,int s,int e,int target){
-	if(e <= target) return siz[v] - siz[u];
-	int m = s + (e - s)/2;
-	if(target <= m) return query(L[u],L[v],s,m,target);
-	return siz[L[v]] - siz[L[u]] + query(R[u],R[v],m + 1,e,target);
-}
+vi add;
 
-
-int main(){
-	//freopen("logger.out","w",stderr);
-	#ifndef ONLINE_JUDGE
-		freopen("input.in", "r", stdin);
-	//	freopen("output.out", "w", stdout);
-	#endif
-	for(int t = 1;scanf("%d %d %d %d",&X,&Y,&n,&Q) == 4 && !(X == 0 && Y == 0 && n == 0 && Q == 0);t++){
-		loop(i,n){
-			int x,y; scanf("%d %d",&x,&y);
-			x--,y--;
-			P[i] = mp(x + y,x - y);
+void solve(int r){
+	r = min(r,2000);
+	int dx [] = {0,r,0,-r};
+	int dy [] = {r,0,-r,0};
+	loop(i,n) {
+		pi corners[4];
+		loop(j,4) {
+			corners[j].xx = P[i].xx + dx[j];
+			corners[j].yy = P[i].yy + dy[j];
 		}
-		sort(P,P + n);
-		if(n) {
-			build(0,-X-Y,X+Y);
-			loop(i,n) T[i + 1] = update(T[i],-X-Y,X+Y,P[i].yy);
-		//	loop(i,n) {prp(P[i]);}
-		//	cerr << endl;
+		// rotate
+		loop(j,4) {
+			int x = corners[j].xx,y = corners[j].yy;
+			corners[j].xx = x - y;
+			corners[j].yy = x + y;
 		}
-		printf("Case %d:\n",t);
-		loop(q,Q){
-			int k; scanf("%d",&k);
-			int ans = 0;
-			pi best = mp(0,0);
-			loop(i,X) loop(j,Y) {
-				int l = i + j - k,r = i + j + k;
-				int lf = i - j - k,rf = i - j + k;
-				l = lower_bound(P,P + n,mp(l,INT_MIN)) - P;
-				r = lower_bound(P,P + n,mp(r,INT_MAX)) - P;
-				if(r <= l) continue;
-				l = T[l];
-				r = T[r];
-				int tmp = query(l,r,-X-Y,X+Y,rf) - query(l,r,-X-Y,X+Y,lf - 1);
-				tmp *= -1;
-				if(tie(tmp,j,i) < tie(ans,best.yy,best.xx)){
-					ans = tmp;
-					best = mp(i,j);
-				}
+		int minX = INT_MAX,minY = INT_MAX;
+		int maxX = INT_MIN,maxY = INT_MIN;
+		loop(j,4) {
+			minX = min(minX,corners[j].xx);
+			minY = min(minY,corners[j].yy);
+			maxX = max(maxX,corners[j].xx);
+			maxY = max(maxY,corners[j].yy);
+		}
+		assert(maxX - minX == maxY-minY);
+		squares[i] = mp(mp(minX,maxX),mp(minY,maxY));
+	}
+	int minX = -H,minY = 0;
+	int maxX = W,maxY = W+H;
+
+	loop(i,n) {
+		minX = min(minX,squares[i].xx.xx);
+		minY = min(minY,squares[i].yy.xx);
+		maxX = max(maxX,squares[i].xx.yy);
+		maxY = max(maxY,squares[i].yy.yy);
+	}
+	loop(i,n){
+		squares[i].xx.xx -= minX;
+		squares[i].xx.yy -= minX;
+		squares[i].yy.xx -= minY;
+		squares[i].yy.yy -= minY;
+	}
+	int Rx = INT_MIN,Ry = INT_MIN;
+	loop(i,n){
+		int minX = squares[i].xx.xx,maxX = squares[i].xx.yy;
+		int minY = squares[i].yy.xx,maxY = squares[i].yy.yy;
+//		prp(mp(minX,maxX));
+//		prp(mp(minY,maxY));
+//		cerr << endl;
+		offset[minX][minY] ++;
+		offset[minX][maxY+1]--;
+		offset[maxX+1][minY] --;
+		offset[maxX+1][maxY+1]++;
+		Rx = max(Rx,maxX+1);
+		Ry = max(Ry,maxY+1);
+	}
+	int M = maxY - minY + 1,N = maxX - minX + 1;
+	add.resize(M);
+	loop(i,M) add[i] = 0;
+	mx = 0;
+	pi aux(INT_MAX,INT_MAX);
+	loop(r,M) {
+		for(int c = 0;c < N;c++)
+			add[c] += offset[r][c];
+		int dv = 0;
+		loop(c,M) {
+			dv += add[c];
+			int tx = (r + minX) + (c + minY);
+			int ty = -(r + minX) + (c + minY);
+			if((tx&1) || (ty&1) || tx <= 0 || ty <= 0) continue;
+			tx >>= 1,ty >>= 1;
+			if(!inside(tx,ty)) continue;
+			if(dv > mx) {
+				mx = dv;
+				aux = mp(INT_MAX,INT_MAX);
 			}
-			ans = -ans;
-			best.xx++;
-			best.yy++;
-			printf("%d (%d,%d)\n",ans,best.xx,best.yy);
+			if(dv == mx) {
+				pi tmp(ty,tx);
+				aux = min(aux,tmp);
+			}
+		}
+	}
+	x = aux.yy,y = aux.xx;
+	if(mx == 0) x = y = 1;
+//	loop(i,min(M+1,MAX)) loop(j,min(N+1,MAX)) offset[i][j] = 0;
+	loop(i,Rx+1) loop(j,Ry+1) offset[i][j] = 0;
+}
+
+int main(int argc,char **argv){
+#ifdef HOME
+	freopen("in.in","r",stdin);
+#endif
+	for(int cn = 1;read();cn++) {
+		loop(i,n) scanf("%d %d",&P[i].xx,&P[i].yy);
+		printf("Case %d:\n",cn);
+		loop(q,Q) {
+			int r; scanf("%d",&r);
+			solve(r);
+			printf("%d (%d,%d)\n",mx,x,y);
 		}
 	}
 	return 0;
 }
-

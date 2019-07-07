@@ -27,20 +27,21 @@ const double PI = acos(-1);
 using namespace std;
 
 #define mul(a,b) (((a)*1LL*(b))%P)
-const int MAX = 1000*1000 + 10;
+const int MAX = 1000*1000 + 10,MAXNUM = 10;
 int A[MAX],B[MAX],N,Q,P,M;
 int inv[MAX];
-vi C[MAX];
+int C[MAX][MAXNUM];
 
 int prime[MAX];
 vi primes;
-int POW[15][MAX*35];
+int POW[MAXNUM][MAX*40];
 vp f;
 
 void sieve(){
 	for(int i = 2;i < MAX;i++)
 		if(!prime[i]) {
 			prime[i] = i;
+			primes.push_back(i);
 			for(ll j = i*1LL*i;j < MAX;j += i)
 				prime[j] = i;
 		}
@@ -71,6 +72,7 @@ vp factorize(int g) {
 	return ret;
 }
 
+
 void preprocess(){
 	f = factorize(P);
 	int phi = P;
@@ -78,70 +80,78 @@ void preprocess(){
 		int p = q.xx;
 		phi -= phi/p;
 	}
-	loop(i,N) {
-		int g = __gcd(A[i],P);
-		A[i] /= g;
-		C[i] = vi(sz(f),0);
-		for(int j = 0;j < sz(f);j++) {
-			int p = f[j].xx;
-			while(g%p == 0) C[i][j]++,g /= p;
+
+	A[0] = 1;
+	inv[0] = 1;
+	range(i,1,N) {
+		for(int j = 0,p;j < sz(f);j++) {
+			p = f[j].xx;
+			C[i][j] = 0;
+			while(A[i]%p == 0){
+				C[i][j]++;
+				A[i] /= p;
+			}
+			C[i][j] += C[i-1][j];
 		}
-		assert(g == 1);
-		if(i){
-			A[i] = mul(A[i],A[i-1]);
-			for(int j = 0;j < sz(f);j++)
-				C[i][j] += C[i-1][j];
-		}
+
+		A[i] = mul(A[i],A[i - 1]);
 		inv[i] = powmod(A[i],phi-1);
 	}
 	for(int i = 0;i < sz(f);i++) {
-		int mx = C[N-1][i],p = f[i].xx;
+		int mx = C[N][i],p = f[i].xx;
 		POW[i][0] = 1;
 		for(int j = 1;j <= mx;j++)
 			POW[i][j] = mul(POW[i][j-1],p);
 	}
 }
 
-
-
 int main(){
 	#ifdef HOME
 		freopen("in.in", "r", stdin);
 	#endif
 	sieve();
+
 	int T; scanf("%d",&T);
 	while(T--) {
 		scanf("%d %d %d",&N,&P,&Q);
-		M = Q/64 + 2;
-		loop(i,N) scanf("%d",A + i);
+		M = (Q >> 6) + 2;
+		range(i,1,N) scanf("%d",A + i);
 		loop(i,M) {
 			scanf("%d",B + i);
 			B[i] = (B[i]%N + N)%N;
 		}
 		preprocess();
-		int x = 0,l,r;
+
+		int x = 0,l,r,z;
 		loop(i,Q) {
+			x %= N;
 			if(i%64 == 0) {
-				l = (B[i/64] + x)%N;
-				r = (B[i/64 + 1] + x)%N;
+				l = B[i >> 6] + x;
+				r = B[(i >> 6) + 1] + x;
 			}
 			else {
-				l = (l + x)%N;
-				r = (r + x)%N;
+				l += x;
+				r += x;
 			}
+			if(l >= N) l -= N;
+			if(r >= N) r -= N;
 			if(l > r) swap(l,r);
-			int ret = A[r];
-			vi E = C[r];
-			if(l) {
-				ret = mul(ret,inv[l-1]);
-				for(int i = 0;i < sz(E);i++)
-					E[i] -= C[l-1][i];
+
+			x = mul(A[r + 1],inv[l]);
+			z = 1;
+			for(int k = 0;k < sz(f);k++) {
+				int e = f[k].yy;
+				int pe = C[r+1][k] - C[l][k];
+				z &= pe >= e;
+				x = mul(x,POW[k][pe]);
 			}
-			for(int i = 0;i < sz(E);i++)
-				ret = mul(ret,POW[i][E[i]]);
-			x = (ret + 1)%P;
+//			cerr << l << " " << r << " -> " << x << " " << z << endl;
+			x = z ? 0 : x;
+			x++;
+			if(x >= P) x = 0;
 		}
 		printf("%d\n",x);
+//		cerr << "=========================" << endl;
 	}
 	return 0;
 }
