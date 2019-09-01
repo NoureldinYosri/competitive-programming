@@ -1,8 +1,8 @@
-#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
-#define loop(i,n) for(int i = 0;i < (n);i++)
+#define loop(i,n) for(int i = 0;i < (int)(n);i++)
 #define range(i,a,b) for(int i = (a);i <= (b);i++)
 #define all(A) A.begin(),A.end()
+#define PI acos(-1)
 #define pb push_back
 #define mp make_pair
 #define sz(A) ((int)A.size())
@@ -12,7 +12,9 @@
 #define vp vector<pair<int,int> >
 #define ll long long
 #define pi pair<int,int>
-#define popcnt(x) __builtin_popcountll(x)
+#define point pair<double,double>
+#define pl pair<ll,ll>
+#define popcnt(x) __builtin_popcount(x)
 #define LSOne(x) ((x) & (-(x)))
 #define xx first
 #define yy second
@@ -21,59 +23,61 @@
 #define prp(p) cerr << "(" << (p).first << " ," << (p).second << ")";
 #define prArr(A,n,t)  cerr << #A << ": "; copy(A,A + n,ostream_iterator<t>(cerr," " )); cerr << endl
 #define PRESTDIO() cin.tie(0),cerr.tie(0),ios_base::sync_with_stdio(0)
-#define what_is(x) cerr << #x << " is " << x << endl
-#define bit_lg(x) (assert(x > 0),__builtin_ffsll(x) - 1)
-const double PI = acos(-1);
 using namespace std;
 
-struct triple{
-	int a,b,c;
-};
+const int MAXN = 2e5 + 1e2,MAXA = 1 << 20;
 
-const int MAX = 1 << 20;
-set<int> E[MAX];
-int fr[MAX],to[MAX],done[MAX];
+unsigned L[MAXN],R[MAXN],order[MAXN];
+unsigned A[MAXN],CTR[MAXA];
+unsigned ll ans[MAXN],H[MAXN];
 int n,m;
-vector<triple> ans;
+
+inline int64_t hilbertOrder(int x, int y, int pow, int rotate) {
+	if (pow == 0) {
+		return 0;
+	}
+	int hpow = 1 << (pow-1);
+	int seg = (x < hpow) ? (
+		(y < hpow) ? 0 : 3
+	) : (
+		(y < hpow) ? 1 : 2
+	);
+	seg = (seg + rotate) & 3;
+	const int rotateDelta[4] = {3, 0, 0, 1};
+	int nx = x & (x ^ hpow), ny = y & (y ^ hpow);
+	int nrot = (rotate + rotateDelta[seg]) & 3;
+	int64_t subSquareSize = int64_t(1) << (2*pow - 2);
+	int64_t ans = seg * subSquareSize;
+	int64_t add = hilbertOrder(nx, ny, pow-1, nrot);
+	ans += (seg == 1 || seg == 2) ? add : (subSquareSize - add - 1);
+	return ans;
+}
 
 int main(){
-	#ifdef HOME
-		freopen("in.in", "r", stdin);
-	#endif
 	scanf("%d %d",&n,&m);
-	loop(e,m) {
-		scanf("%d %d",fr + e,to + e);
-		E[fr[e]].insert(e);
-		E[to[e]].insert(e);
+	loop(i,n) scanf("%u",A + i + 1);
+	loop(i,m) {
+		scanf("%u %u",L + i,R + i);
+		order[i] = i;
+		H[i] = hilbertOrder(L[i],R[i],20,0);
 	}
-	set<pi> S;
-	range(i,1,n) S.insert(mp(sz(E[i]),i));
-	while(!S.empty()) {
-		int u = S.begin()->yy;
-		S.erase(S.begin());
-		if(E[u].empty()) continue;
-		int e1 = *E[u].begin();
-		int v = fr[e1] + to[e1] - u;
-		auto tmp = *S.find(mp(sz(E[v]),v));
-		E[u].erase(e1);
-		E[v].erase(e1);
-		S.erase(tmp);
-		if(!E[v].empty()) {
-			int e2 = *E[v].begin();
-			int t = fr[e2] + to[e2] - v;
-			tmp = *S.find(mp(sz(E[t]),t));
-			S.erase(tmp);
-			E[t].erase(e2);
-			E[v].erase(e2);
-			ans.pb(triple({u,v,t}));
-			if(!E[t].empty()) S.insert(mp(sz(E[t]),t));
+	sort(order,order + m,[](const int & a,const int & b){
+		return H[a] < H[b];
+	});
+	int l = 0,r = -1;
+	unsigned ll tmp = 0;
+	for(int j = 0;j < m;j++){
+		int i = order[j];
+		for(int k = R[i];r < k;r++) tmp += (2*CTR[A[r + 1]] + 1LL)*A[r + 1],CTR[A[r + 1]]++;
+		for(int k = L[i];l > k;l--) tmp += (2*CTR[A[l - 1]] + 1LL)*A[l - 1],CTR[A[l - 1]]++;
+		for(int k = L[i];l < k;l++) {
+			tmp -= (2*CTR[A[l]] - 1LL)*A[l],CTR[A[l]]--;
 		}
-		if(!E[u].empty()) S.insert(mp(sz(E[u]),u));
-		if(!E[v].empty()) S.insert(mp(sz(E[v]),v));
+		for(int k = R[i];r > k;r--) {
+			tmp -= (2*CTR[A[r]] - 1LL)*A[r],CTR[A[r]]--;
+		}
+		ans[i] = tmp;
 	}
-
-	printf("%d\n",sz(ans));
-	for(auto t : ans)
-		printf("%d %d %d\n",t.a,t.b,t.c);
+	loop(i,m) printf("%llu\n",ans[i]);
 	return 0;
 }

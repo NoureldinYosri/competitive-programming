@@ -1,3 +1,4 @@
+#ifdef ACTIVE
 #pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
@@ -220,3 +221,4 @@ int main(int argc,char **argv){
 	}
 	return 0;
 }
+#endif
