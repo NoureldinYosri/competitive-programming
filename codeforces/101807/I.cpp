@@ -25,23 +25,74 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 100*1000 + 10;
+vi G[MAX];
+int A[MAX];
+int ord[MAX],n,m;
 
 
+
+void solve(int s) {
+	set<int> S,vis;
+	loop(i,s) {
+		for(int v : G[A[i]])
+			S.insert(v);
+	}
+	loop(i,s) S.erase(A[i]),vis.insert(A[i]);
+	while(s < n) {
+		assert(!S.empty());
+		int u = *S.begin();
+		S.erase(S.begin());
+		A[s++] = u;
+		vis.insert(u);
+		for(int v : G[u])
+			if(!vis.count(v))
+				S.insert(v);
+	}
+	loop(i,n) printf("%d%c",A[i]," \n"[i==n-1]);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d %d",&n,&m);
+	loop(e,m) {
+		int a,b; scanf("%d %d",&a,&b);
+		G[a].push_back(b);
+		G[b].push_back(a);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	loop(i,n){
+		scanf("%d",A + i);
+		ord[A[i]] = i;
+	}
+	set<int> aux,vis;
+	vi change(n,-1);
+	loop(i,n) {
+		int u = A[i];
+		auto ptr = aux.upper_bound(u);
+		if(ptr != aux.end())
+			change[i] = *ptr;
+		vis.insert(u);
+		aux.erase(u);
+		for(int v : G[u])
+			if(!vis.count(v))
+				aux.insert(v);
+	}
+	for(int i = n-1;i;i--) {
+		if(change[i] != -1) {
+			A[i] = change[i];
+			solve(i+1);
+			return 0;
+		}
+	}
+
+	if(A[0] < n) {
+		A[0]++;
+		solve(1);
+		return 0;
+	}
+	puts("-1");
 	return 0;
 }
 #endif

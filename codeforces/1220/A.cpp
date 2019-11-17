@@ -1,4 +1,4 @@
-#ifdef ACTIVE
+#ifdef DEBUG
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -26,22 +26,19 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+int cnt[128];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
-	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	int n;
+	string s; cin >> n >> s;
+	for(char c : s) cnt[c]++;
+	int one = cnt['n'];
+	int zero = cnt['z'];
+	loop(i,one)  printf("1 ");
+	loop(i,zero) printf("0 ");
 	return 0;
 }
 #endif

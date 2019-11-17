@@ -1,4 +1,3 @@
-#ifdef ACTIVE
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -25,6 +24,12 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 10*1000*1000 + 10;
+ll a,b;
+char buffer[MAX];
+char *S;
+int n;
+
 
 
 
@@ -32,16 +37,35 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%lld %lld",&a,&b);
+	scanf("%s",buffer);
+	S = find(buffer,buffer + strlen(buffer),'.') + 1;
+	n = strlen(S);
+
+	int i = 0,m = 1,k = 0,j = 1;
+	while(j + k <= n) {
+		if(k == m) {
+			j += k;
+			k = 0;
+		}
+		else if(S[i+k] == S[j+k]) k++;
+		else if(S[j+1] == S[i] && m == 1) {
+			m++;
+			i = j+1;
+			j++;
+			k = 0;
+		}
+		else {
+			i = j;
+			m = 1;
+			j++;
+			k = 0;
+		}
+		cout << i << " " << j << " " << k << " " << m << endl;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	cout << (S+i) << " " << m << endl;
+
+//	ll ans = a-b;
+
 	return 0;
 }
-#endif

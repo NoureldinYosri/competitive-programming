@@ -1,4 +1,3 @@
-#ifdef ACTIVE
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -32,16 +31,16 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	int n; scanf("%d",&n);
+	vi ans;
+	ans.push_back(0);
+	for(int cnt = 1;sz(ans) <= n;cnt++) {
+		int x = ans.back() + 1;
+		int d = min(cnt,n+1-sz(ans));
+		loop(i,d) ans.push_back(x);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	printf("%d\n",ans.back());
+	reverse(all(ans));
+	for(int x : ans) printf("%d ",x);
 	return 0;
 }
-#endif

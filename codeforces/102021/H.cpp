@@ -25,23 +25,55 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+ll mul(ll a,ll b) {
+	if(a < LLONG_MAX/b) return a*b;
+	return LLONG_MAX;
+}
+ll add(ll a,ll b) {
+	if(a <= LLONG_MAX - b) return a+b;
+	return LLONG_MAX;
+}
 
+ll POW(ll s,int p ){
+	if(p == 0) return 1;
+	ll y = 1;
+	for(;p > 1;p >>= 1) {
+		if(p & 1) y = mul(s,y);
+		s = mul(s,s);
+	}
+	return mul(s,y);
+}
 
+ll f(int s,int n) {
+	ll ret = 0;
+	for(;s;s--) ret += POW(s,n-1);
+	return ret;
+}
+
+int getS(int n,ll K) {
+	int e = round(pow(K,1/(n - 1.0)));
+	ll tot = 0;
+	for(int s = 1;s <= e;s++) {
+		tot = add(tot,POW(s,n-1));
+		if(tot == K) return s;
+		if(tot > K) return -1;
+	}
+	return -1;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	ll m; cin >> m;
+	for(int n = 3;n <= 55;n++){
+		int s = getS(n,m);
+		if(s != -1) {
+			printf("%d %d\n",n,s);
+			return 0;
+		}
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	puts("impossible");
 	return 0;
 }
 #endif

@@ -32,16 +32,27 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	map<int,vi> M;
+	int n; scanf("%d",&n);
+	loop(i,n) {
+		int x; scanf("%d",&x);
+		M[x].push_back(i+1);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	if(M.count(1) && sz(M[1]) > 1) {
+		printf("%d %d\n",M[1][0],M[1][1]);
+		return 0;
+	}
+	int u = 1,v = 2;
+	while(v <= M.rbegin()->first) {
+		if(M.count(u) && M.count(v)) {
+			int a = M[u][0],b = M[v][0];
+			printf("%d %d\n",a,b);
+			return 0;
+		}
+		u += v;
+		swap(u,v);
+	}
+	puts("impossible");
 	return 0;
 }
 #endif

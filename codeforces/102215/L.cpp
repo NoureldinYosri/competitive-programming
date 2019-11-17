@@ -25,23 +25,37 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+using point = complex<double>;
 
+point read(){
+	double x,y;
+	cin >> x >> y;
+	return point(x,y);
+}
 
+double dot(point p,point q) {
+	return (conj(p)*q).real();
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	point p = read();;
+	int r; cin >> r;
+	point q = read();
+	int R; cin >> R;
+	if(R < r) {
+		swap(r,R);
+		swap(p,q);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	point dir = p - q;
+	double dist = sqrt(dot(dir,dir));
+	double rd = (r + R - dist)/2.0;
+	dist = max(dist,0.0);
+	if(dist > 0) dir /= dist;
+	point c = q + dir * (R - rd);
+	printf("%.10f %.10f %0.10f\n",c.real(),c.imag(),rd);
 	return 0;
 }
 #endif

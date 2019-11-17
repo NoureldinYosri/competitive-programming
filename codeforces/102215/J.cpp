@@ -26,22 +26,30 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAX = 500*1000 + 10;
+ll weak[MAX],sum[MAX];
+int n;
+ll A[MAX];
 
+void read(int i){
+	ll a,b,c;
+	scanf("%lld %lld %lld",&a,&b,&c);
+	sum[i] = a + b + c;
+	A[i] = weak[i] = sum[i] - max(a,max(b,c)) + 2;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(i,n) read(i);
+	sort(A,A + n);
+	loop(i,n) {
+		int ans = upper_bound(A,A + n,sum[i]) - A;
+		ans -= weak[i] <= sum[i];
+		printf("%d%c",ans," \n"[i==n-1]);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif

@@ -25,23 +25,79 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int mod = 1000000007;
+int x;
+ll n;
 
+vi primes;
 
+void factor(){
+	for(int i = 2;i*i <= x;i++){
+		if(x%i) continue;
+		primes.push_back(i);
+		while(x%i == 0) x /= i;
+	}
+	if(x > 1) primes.push_back(x);
+}
+
+int add(int a,int b) {
+	a += b;
+	if(a >= mod) a -= mod;
+	return a;
+}
+int mul(int a,int b){
+	return (a*(ll)b)%mod;
+}
+
+int powmod(int x,ll p) {
+	if(p == 0) return 1;
+	int y = 1;
+	for(;p > 1;p >>= 1) {
+		if(p & 1) y = mul(x,y);
+		x = mul(x,x);
+	}
+	return mul(x,y);
+}
+
+int solve(int p) {
+	int res = 1;
+	ll q = p;
+	while(q <= n) {
+		int tmp = powmod(p,(n/q)%(mod - 1));
+		res = mul(res,tmp);
+		if(p <= n/q)
+			q *= p;
+		else break;
+	}
+	return res;
+}
+
+int getQ(int m,int p) {
+	int q = 1;
+	while(m%(q*p) == 0) q *= p;
+	return q;
+}
+
+int bf(int p){
+	int res = 1;
+	for(int m = 1;m <= n;m++)
+		res = mul(res,getQ(m,p));
+	return res;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	cin >> x >> n;
+	factor();
+	int ans = 1;
+	for(int p : primes) {
+		int g = solve(p);
+		ans = mul(ans,g);
+//		cout << p << " " << g << " " << bf(p) << endl;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	cout << ans << endl;
 	return 0;
 }
 #endif

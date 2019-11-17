@@ -26,22 +26,30 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+const int MAX = 1 << 20;
+int n;
+int A[MAX];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(i,n) scanf("%d",A + i);
+	ll L = 0,U = A[0];
+	ll v = 0;
+	for(int i = 0;i < n;i++) {
+		// A[i] - x >= 0
+		// A[i] - (s*x0 + v) >= 0
+		// A[i] - s*x0 - v >= 0
+		// A[i] - v >= s*x0
+		v = A[i] - v;
+		if(i%2) L = max(L,-v);
+		else U = min(U,v);
+//		cout << ((i%2) ? "x" : "-x") << " + " << v << ": " << L << " " << U << endl;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	if(L <= U) printf("%lld\n",U-L+1);
+	else puts("0");
 	return 0;
 }
 #endif

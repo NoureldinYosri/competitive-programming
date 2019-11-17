@@ -26,22 +26,22 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+vector<int> group[311];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	int n; cin >> n;
+	vi aux;
+	for(int g = 0;g < n;g++) {
+		aux.clear();
+		loop(i,n) aux.push_back(g*n + i);
+		if(g&1) reverse(all(aux));
+		loop(i,n) group[i].push_back(aux[i]+1);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	loop(i,n) loop(j,n) printf("%d%c",group[i][j]," \n"[j==n-1]);
 	return 0;
 }
 #endif

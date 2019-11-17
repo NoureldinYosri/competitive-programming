@@ -26,22 +26,66 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+int n,Q;
+pi P[2 << 10];
 
+pi operator - (const pi & a,const pi & b){
+	return pi(a.first-b.first,a.second-b.second);
+}
+
+pi canon(pi v) {
+	if(v.first == 0) return pi(0,1);
+	if(v.first < 0) v = pi(-v.first,-v.second);
+	int g = __gcd(v.first,abs(v.second));
+	v.first /= g;
+	v.second /= g;
+	return v;
+}
+
+struct Hash{
+	ll operator () (const pi & p) const {
+		return p.first * 1e9 + p.second;
+	}
+};
+
+unordered_map<pi,int,Hash> cnt[2 << 10];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d %d",&n,&Q);
+	loop(i,n) scanf("%d %d",&P[i].first,&P[i].second);
+	loop(j,n) loop(i,n){
+		if(i == j) continue;
+		pi v = P[i] - P[j];
+		v = canon(v);
+		cnt[j][v]++;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+
+	unordered_map<pi,int,Hash> aux;
+	while(Q--) {
+		pi p; scanf("%d %d",&p.first,&p.second);
+		int ans = 0;
+		aux.clear();
+		loop(i,n) {
+			pi u = p - P[i];
+			pi v = pi(u.second,-u.first);
+			u = canon(u);
+			v = canon(v);
+
+			int tmp = 0;
+
+			if(aux.count(v)) tmp += aux[v];
+			aux[u]++;
+
+			if(cnt[i].count(v))
+				tmp += cnt[i][v];
+//			cout << p << " " << P[i] << ": " << tmp << endl;
+			ans += tmp;
+		}
+		printf("%d\n",ans);
+	}
 	return 0;
 }
 #endif

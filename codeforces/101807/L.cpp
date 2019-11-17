@@ -26,22 +26,45 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+string ans[3];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	int W,a,b; scanf("%d %d %d",&W,&a,&b);
+	loop(i,3) ans[i] = string(W,'.');
+	a--,b--;
+	ans[0][a] = 'A';
+	ans[1][0] = 'X';
+	ans[2][b] = 'B';
+	if(a == b) {
+		puts("Possible");
+		loop(i,3) puts(ans[i].c_str());
+		return 0;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	if((a+b)&1) {
+		puts("Impossible");
+		return 0;
+	}
+	if(min(a,b) == 0){
+		puts("Impossible");
+		return 0;
+	}
+	int x = (a + b - 2)/2;
+	int r = (a < b) ? 0 : 2;
+	ans[r][min(a,b)-1] = '*';
+	for(int c = min(a,b);c < x;c++)
+		ans[1][c] = '*';
+	if(min(a,b) == x)
+		ans[1][x-1] = '*';
+	if(ans[1][0] != 'X') {
+		puts("Impossible");
+		return 0;
+	}
+	puts("Possible");
+	loop(i,3) puts(ans[i].c_str());
 	return 0;
 }
 #endif

@@ -26,22 +26,33 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+const int MAX = 1 << 20;
+int ord[MAX];
+int A[MAX],B[MAX],n;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(i,n){
+		scanf("%d",A + i);
+		ord[A[i]] = i;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	loop(i,n){
+		scanf("%d",B + i);
+		B[i] = ord[B[i]];
+	}
+//	prArr(B,n,int);
+	reverse(B,B + n);
+	int ans = 0;
+	int mn = INT_MAX;
+	loop(i,n){
+//		cout <<B[i] << " " << mn << endl;
+		ans += mn < B[i];
+		mn = min(mn,B[i]);
+	}
+	printf("%d\n",ans);
 	return 0;
 }
 #endif

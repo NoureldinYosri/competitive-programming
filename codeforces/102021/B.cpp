@@ -26,21 +26,54 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+using point = complex<double>;
 
+point S,D;
+point B;
+point R;
+double rB,rR;
+
+point read(){
+	double x,y; cin >> x >> y;
+	return point(x,y);
+}
+
+double dot(point a,point b){
+	return (conj(a)*b).real();
+}
+
+double len(point p) {
+	return sqrt(dot(p,p));
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
-	}
-	ans = min(ans,L);
+	S = read();
+	D = read();
+	B = read();
+	cin >> rB;
+	R = read();
+	cin >> rR;
+
+	S -= R;
+	D -= R;
+	double L = len(D - S);
+	double d1 = len(S);
+	double d2 = len(D);
+	double r = rR;
+	double l1 = sqrt(d1*d1 - r*r);
+	double l2 = sqrt(d2*d2 - r*r);
+	double t1 = atan2(l1,r);
+	double t2 = atan2(l2,r);
+	double c = (d1*d1 + d2*d2 - L*L)/(2*d1*d2);
+	c = max(c,-1.0);
+	c = min(c,1.0);
+	double t123 = acos(c);
+	double t3 = t123 - t1 - t2;
+//	cout << t1*180/PI << " " << t2*180/PI << " " << t3*180/PI << endl;
+	double ans = l1 + l2 + t3*r;
 	printf("%.10f\n",ans);
 	return 0;
 }

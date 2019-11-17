@@ -25,6 +25,34 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 452;
+
+int n,K;
+char S[1 << 20];
+ll dp[MAX][MAX];
+int C[MAX][MAX];
+
+ll solve(int i,int s) {
+	if(i == n) return 0;
+	ll & ret = dp[i][s];
+	if(ret != -1) return ret;
+	if(S[i] == '0') return ret = solve(i+1,s);
+	ret = 1LL << 60;
+	C[i][s] = -1;
+	int sum = 0,k = 0,j;
+	for(j = i;j < n;j++){
+		if(S[j] == '0') {
+			ret = min(ret,sum + solve(j+1,s));
+			break;
+		}
+		if(s) ret = min(ret,solve(j+1,s-1) + sum);
+		++k;
+		sum += k;
+	}
+	if(j == n) ret = min(ret,(ll)sum);
+//	cout << i << " " << s << ": " << ret << endl;
+	return ret;
+}
 
 
 
@@ -32,16 +60,13 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
-	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	cin >> n >> K >> S;
+	memset(dp,-1,sizeof dp);
+	for(int s = 0;s <= n;s++)
+		if(solve(0,s) <= K){
+			cout << s << endl;
+			return 0;
+		}
 	return 0;
 }
 #endif

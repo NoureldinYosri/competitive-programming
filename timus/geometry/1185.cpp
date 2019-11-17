@@ -25,23 +25,52 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 1 << 10;
+pi P[MAX];
+int n;
 
+ll cross(pi o,pi a,pi b) {
+	a.first -= o.first,a.second -= o.second;
+	b.first -= o.first,b.second -= o.second;
+	return a.first*(ll)b.second - a.second*(ll)b.first;
+}
+int sgn(ll x) {
+	return (x > 0) - (x < 0);
+}
+
+double dist(pi a,pi b) {
+	return hypot(a.first - b.first,a.second - b.second);
+}
+
+
+vector<pi> getHull(){
+	vector<pi> H;
+	loop(i,n) {
+		pi p = P[i];
+		while(sz(H) > 1 && cross(H[sz(H)-2],H[sz(H)-1],p) >= 0) H.pop_back();
+		H.push_back(p);
+	}
+	return H;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
+	int L;
+	scanf("%d %d",&n,&L);
+	loop(i,n) scanf("%d %d",&P[i].first,&P[i].second);
+	sort(P,P + n);
+	vector<pi> U = getHull();
+	reverse(P,P + n);
+	vector<pi> D = getHull();
+
 	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
-	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	for(int i = 0;i+1 < sz(U);i++) ans += dist(U[i],U[i+1]);
+	for(int i = 0;i+1 < sz(D);i++) ans += dist(D[i],D[i+1]);
+	ans += 2*PI*L;
+	printf("%.0f\n",ans);
 	return 0;
 }
 #endif

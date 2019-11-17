@@ -26,22 +26,31 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+int n;
+int A[1024],B[1024];
 
+bool win(int t) {
+	loop(i,n) {
+		if(A[i] + t > B[i]) return 1;
+		if(A[i] + t < B[i]) return 0;
+	}
+	return 1;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(i,n) scanf("%d",A + i);
+	loop(i,n) scanf("%d",B + i);
+	int s = 0,e = 2000;
+	while(s < e) {
+		int m = (s + e) >> 1;
+		if(win(m)) e = m;
+		else s = m+1;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	cout << s << endl;
 	return 0;
 }
 #endif

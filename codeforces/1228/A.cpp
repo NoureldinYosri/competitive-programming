@@ -26,22 +26,28 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+bool cond(int x) {
+	int msk = 0;
+	while(x) {
+		int d = x%10;
+		x /= 10;
+		if(msk& (1 << d)) return 0;
+		msk |= 1 << d;
+	}
+	return 1;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
-	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	int l,r; cin >> l >> r;
+	for(int x = l;x <= r;x++)
+		if(cond(x)){
+			cout << x << endl;
+			return 0;
+		}
+	cout << -1 << endl;
 	return 0;
 }
 #endif

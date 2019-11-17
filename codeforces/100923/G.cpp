@@ -25,23 +25,49 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 300;
+int A[MAX][MAX];
+int m,n;
+ll aux[MAX][MAX],dp[MAX][MAX];
 
 
+ll solve(){
+	loop(i,n) loop(j,n) aux[i][j] = dp[i][j] = 0;
+
+	ll ans = LLONG_MIN;
+	for(int r = m-1;r >= 0;r--) {
+		for(int s = 0;s < n;s++){
+			ll seg_sum = 0;
+			for(int e = s;e < n;e++) {
+				seg_sum += A[r][e];
+				ll tmp = max(0LL,aux[e][s]);
+				dp[s][e] = seg_sum + tmp;
+				ans = max(ans,dp[s][e]);
+			}
+		}
+		for(int s = 0;s < n;s++)
+			for(int e = 0;e < n;e++){
+				aux[s][e] = dp[s][e];
+				dp[s][e] = 0;
+			}
+		for(int s = 0;s < n;s++)
+			for(int e = n-1;e >= 0;e--) {
+				if(e+1 < n) aux[s][e] = max(aux[s][e],aux[s][e+1]);
+				if(s) aux[s][e] = max(aux[s][e],aux[s-1][e]);
+			}
+	}
+	return ans;
+}
 
 int main(){
-#ifdef HOME
-	freopen("in.in", "r", stdin);
-#endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	freopen("livada2.in", "r", stdin);
+	freopen("livada2.out","w",stdout);
+
+	tc(){
+		scanf("%d %d",&m,&n);
+		loop(i,m) loop(j,n) scanf("%d",&A[i][j]);
+		printf("%lld\n",solve());
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif

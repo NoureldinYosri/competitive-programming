@@ -25,6 +25,26 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 200000;
+pi I[MAX];
+int n;
+set<pi> CH;
+
+ll cross(pi o,pi a,pi b) {
+	a.first -= o.first,a.second -= o.second;
+	b.first -= o.first,b.second -= o.second;
+	return a.first*(ll)b.second - a.second*(ll)b.first;
+}
+
+pi getHull(vector<pi> & P) {
+	vector<pi> H;
+	for(pi p : P) {
+		while(sz(H) > 1 && cross(H[sz(H)-2],H[sz(H)-1],p) >= 0) H.pop_back();
+		H.push_back(p);
+	}
+	for(auto p : H) CH.insert(p);
+	return H[1];
+}
 
 
 
@@ -32,16 +52,21 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(i,n) scanf("%d %d",&I[i].first,&I[i].second);
+	auto ptr = min_element(I,I + n);
+	rotate(I,ptr,I + n);
+	vector<pi> P{I,I + n};
+	sort(all(P));
+	pi target = getHull(P);
+	reverse(all(P));
+	getHull(P);
+	for(int i = 1;i < n;i++) {
+		if(CH.count(I[i])) {
+			puts((target == I[i]) ? "cw" : "ccw");
+			return 0;
+		}
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif

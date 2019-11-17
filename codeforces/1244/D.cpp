@@ -25,6 +25,10 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 100*1000 + 10;
+
+int C[MAX][3],n;
+vi G[MAX];
 
 
 
@@ -32,16 +36,55 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d",&n);
+	loop(j,3)
+		for(int u = 1;u <= n;u++)
+			scanf("%d",&C[u][j]);
+	loop(e,n-1) {
+		int a,b; scanf("%d %d",&a,&b);
+		G[a].push_back(b);
+		G[b].push_back(a);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	for(int u = 1;u <= n;u++)
+		if(sz(G[u]) > 2) {
+			puts("-1");
+			return 0;
+		}
+
+	int root = 1;
+	while(sz(G[root]) != 1) root++;
+
+	ll best = LLONG_MAX;
+	vi bestColors;
+	int color[3] = {0,1,2};
+
+	do{
+		ll tmp = 0;
+		for(int u = root,p = 0,i = 0;i < n;i++) {
+			tmp += C[u][color[i%3]];
+			int s = 0;
+			for(int v : G[u]) s += v;
+			s -= p;
+			p = u;
+			u = s;
+		}
+		if(tmp < best) {
+			best = tmp;
+			bestColors = vi{color,color+3};
+		}
+	}while(next_permutation(color,color + 3));
+	printf("%lld\n",best);
+	int ans[MAX];
+	for(int u = root,p = 0,i = 0;i < n;i++) {
+		ans[u] = bestColors[i%3] + 1;
+		int s = 0;
+		for(int v : G[u]) s += v;
+		s -= p;
+		p = u;
+		u = s;
+	}
+	for(int u = 1;u <= n;u++)
+		printf("%d%c",ans[u]," \n"[u==n]);
 	return 0;
 }
 #endif

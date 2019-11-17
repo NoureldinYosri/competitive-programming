@@ -26,22 +26,64 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+string out;
+char buffer[50];
 
+void write(int x) {
+	sprintf(buffer,"%d",x);
+	out += string(buffer);
+}
+
+string form(int c,int p) {
+	string ret;
+	if(c != 1) ret += to_string(c);
+	if(p) ret.push_back('x');
+	if(p > 1) ret += to_string(p);
+	return ret;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	string s; cin >> s;
+	int sgn = (s[0] == '-') ? -1 : 1;
+	for(int i = s[0]=='-';i < sz(s);i++) {
+		int j = i;
+		while(j < sz(s) && (s[j] != '-' && s[j] != '+')) j++;
+		string term = s.substr(i,j-i);
+//		cout << sgn << " " << term << endl;
+		int c = 1;
+		if(term[0] != 'x') sscanf(term.c_str(),"%d",&c);
+		int p = 0;
+		auto ptr = find(all(term),'x');
+		if(ptr != term.end()) {
+			p = 1;
+			ptr++;
+			if(ptr != term.end()){
+				p = 0;
+				while(ptr != term.end()){
+					p = p*10 + *ptr - '0';
+					ptr++;
+				}
+			}
+		}
+		c *= sgn*p;
+		p--;
+
+		if(c) {
+			if(c < 0) out.push_back('-'),c *= -1;
+			else if(!out.empty()) out.push_back('+');
+			string aux = form(c,p);
+			if(aux.empty()) aux = "1";
+			out += aux;
+		}
+
+		if(j < sz(s)) sgn = (s[j] == '+' ) ? 1 : -1;
+		i = j;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	if(out.empty()) out = "0";
+	cout << out << endl;
 	return 0;
 }
 #endif

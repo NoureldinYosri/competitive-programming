@@ -25,23 +25,64 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 1 << 20;
+ll price[MAX];
+int n;
+int x,a,y,b;
+ll K;
+int ctr[4][MAX];
 
-
+bool can(int m) {
+	int ab = ctr[3][m-1];
+	int a = ctr[1][m-1];
+	int b = ctr[2][m-1];
+	ll k = 0;
+	int s = 0;
+	loop(i,ab) k += price[s++] * (x+y);
+	loop(i,a) k += price[s++]*x;
+	loop(i,b) k += price[s++]*y;
+	return k >= K;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	int Q; scanf("%d",&Q);
+	while(Q--) {
+		scanf("%d",&n);
+		loop(i,n) {
+			scanf("%lld",price + i);
+			assert(price[i]%100 == 0);
+			price[i] /= 100;
+		}
+		sort(price,price + n);
+		reverse(price,price + n);
+		scanf("%d %d",&x,&a);
+		scanf("%d %d",&y,&b);
+		scanf("%lld",&K);
+		if(x < y) {
+			swap(a,b);
+			swap(x,y);
+		}
+		loop(i,n) {
+			int h = 0;
+			if(i%a == a-1) h |= 1;
+			if(i%b == b-1) h |= 2;
+			loop(j,4) ctr[j][i] = i ? ctr[j][i-1] : 0;
+			ctr[h][i]++;
+		}
+		if(!can(n)) puts("-1");
+		else {
+			int s = 1,e = n;
+			while(s < e) {
+				int m = (s+e) >> 1;
+				if(can(m)) e = m;
+				else s = m+1;
+			}
+			printf("%d\n",s);
+		}
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif

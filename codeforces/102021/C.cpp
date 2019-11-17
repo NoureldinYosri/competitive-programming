@@ -25,23 +25,35 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 5 << 10;
 
+int n,m;
+int fr[MAX],to[MAX],W[MAX];
+vi E[MAX];
+ll dp[MAX];
 
+ll solve(int u) {
+	ll & ret = dp[u];
+	if(ret != -1) return ret;
+	ret = 0;
+	for(int e : E[u])
+		ret = max(ret,W[e] + solve(to[e]));
+	return ret;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d %d",&n,&m);
+	loop(e,m) {
+		scanf("%d %d %d",fr + e,to + e,W+e);
+		E[fr[e]].push_back(e);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	memset(dp,-1,sizeof dp);
+	ll ans = 0;
+	for(int i = 1;i <= n;i++) ans = max(ans,solve(i));
+	printf("%lld\n",ans);
 	return 0;
 }
 #endif

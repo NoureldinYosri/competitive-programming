@@ -25,23 +25,72 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 1 << 20;
+vi G[MAX];
+int n,m;
+int color[MAX];
+
+void step1(){
+	for(int v : G[1])
+		color[v] = 0;
+}
 
 
+void step2(){
+	for(int u = 1;u <= n;u++)
+		if(!color[u]) {
+			for(int v : G[u])
+				if(!color[v])
+					color[v] = 3;
+			break;
+		}
+	for(int u = 1;u <= n;u++)
+		if(!color[u])
+			color[u] = 2;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d %d",&n,&m);
+	loop(e,m){
+		int a,b; scanf("%d %d",&a,&b);
+		G[a].push_back(b);
+		G[b].push_back(a);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	for(int i = 1;i <= n;i++) color[i] = 1;
+	step1();
+	for(int u = 1;u <= n;u++) if(color[u] == 1) {
+		for(int v : G[u]) if(color[v] == 1) {
+			puts("-1");
+			return 0;
+		}
+	}
+
+	step2();
+
+	ll cnt[4] = {0,0,0,0};
+	for(int u = 1;u <= n;u++){
+		for(int v : G[u])
+			if(color[u] == color[v]) {
+				puts("-1");
+				return 0;
+			}
+		cnt[color[u]]++;
+	}
+
+	ll a = cnt[1],b = cnt[2],c = cnt[3];
+	if(!a || !b || !c) {
+		puts("-1");
+		return 0;
+	}
+	ll needed = a*b + b*c + a*c;
+	if(needed != m) {
+		puts("-1");
+		return 0;
+	}
+	loop(i,n) printf("%d%c",color[i+1]," \n"[i==n-1]);
 	return 0;
 }
 #endif

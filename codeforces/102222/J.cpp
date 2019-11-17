@@ -1,4 +1,3 @@
-#ifdef ACTIVE
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -26,22 +25,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+pi P,Q;
 
+
+ll cross(pi o,pi a,pi b) {
+	a.first -= o.first,a.second -= o.second;
+	b.first -= o.first,b.second -= o.second;
+	return a.first*(ll)b.second - a.second*(ll)b.first;
+}
+
+
+
+
+pi readPoint(){
+	int x,y; scanf("%d %d",&x,&y);
+	return pi(x,y);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	vector<pi> U,D;
+	int T; scanf("%d",&T);
+	for(int t = 1;t <= T;t++) {
+		P = readPoint();
+		Q = readPoint();
+		int n; scanf("%d",&n);
+		U.clear(),D.clear();
+		for(int i = 0;i < n;i++){
+			pi p = readPoint();
+			if(cross(P,Q,p) > 0) U.push_back(p);
+			else D.push_back(p);
+		}
+		pair<>
+		printf("")
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
-#endif

@@ -26,22 +26,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+int n,g;
+int D[60];
+double dp[60][61][1000 + 5*63 + 10];
+
+double solve(int i,int m,int L) {
+	if(L > g + 5*(m+1)) return -2;
+	if(i == -1) {
+		double res = (L >= g) ? (L - g)/(m+1.0) : -2;
+//		cout << m << " " << L << " " << res << endl;
+		return res;
+	}
+	double & ret = dp[i][m][L];
+	if(ret == ret) return ret;
+	ret = max(solve(i-1,m,L),solve(i-1,m+1,L+D[i]));
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	cin >> n >> g;
+	loop(i,n) cin >> D[i];
+	sort(D,D + n);
+	reverse(D,D + n);
+	int s = accumulate(D,D + n,0);
+	if(s + 10 < g) {
+		puts("impossible");
+		return 0;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	memset(dp,-1,sizeof dp);
+	double ans = solve(n-1,0,10);
+	if(ans < 0 || ans > 5) puts("impossible");
+	else printf("%.10f\n",ans);
 	return 0;
 }
 #endif

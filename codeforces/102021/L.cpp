@@ -25,23 +25,53 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 111;
+char res[MAX][MAX];
+int cnt[MAX][MAX];
+int m,n;
 
-
+int getCount(int r,int c) {
+	int ret = 0;
+	for(int dx = -1;dx <= 1;dx++)
+		for(int dy = -1;dy <= 1;dy++) {
+			int x = r + dx,y = c + dy;
+			if(x < 0 || x >= m+2 || y < 0 || y >= n+2) continue;
+			ret += res[x][y] == 'X';
+		}
+	return ret;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	scanf("%d %d",&m,&n);
+	loop(i,m+2) loop(j,n+2) {
+		scanf("%d",&cnt[i][j]);
+		res[i][j] = '.';
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	for(int r = 1;r <= m;r++)
+		for(int c = 1;c <= n;c++) {
+			int ctr = getCount(r-1,c-1);
+			int diff = cnt[r-1][c-1] - ctr;
+//			cerr << r-1 << " " << c-1 << ": " << ctr << " " << cnt[r-1][c-1] << endl;
+			if(diff == 0) continue;
+			if(diff == 1) {
+//				cerr << r << " " << c << " is black" << endl;
+				res[r][c] = 'X';
+				continue;
+			}
+			puts("impossible");
+			return 0;
+		}
+	loop(r,m+2) loop(c,n+2) if(getCount(r,c) != cnt[r][c]) {
+		puts("impossible");
+		return 0;
+	}
+	for(int r = 1;r <= m;r++){
+		res[r][n+1] = 0;
+		puts(res[r]+1);
+	}
 	return 0;
 }
 #endif

@@ -25,23 +25,50 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 200*100*1000;
+bool is_prime[MAX];
 
 
+void sieve(){
+	fill(is_prime+2,is_prime+MAX,1);
+	for(int i = 2;i < MAX;i++)
+		if(is_prime[i]) {
+			for(ll j = i*(ll)i;j < MAX;j += i)
+				is_prime[j] = 0;
+		}
+}
+
+int read(){
+	static char buf[20];
+	scanf("%s",buf);
+	int a,b = 0;
+	sscanf(buf,"%d",&a);
+	int L = strlen(buf),h = 100*1000;
+	int i = find(buf,buf + L,'.') - buf;
+	if(i == L) return a*h;
+	string s (buf+i+1);
+	while(!s.empty() && !isdigit(s.back())) s.pop_back();
+	while(sz(s) < 5) s.push_back('0');
+	sscanf(s.c_str(),"%d",&b);
+	return a*h + b;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	sieve();
+	int n; scanf("%d",&n);
+	while(n--) {
+		int a = read(),b = read();
+//		cout << a << " " << b << endl;
+		int g = __gcd(a,b);
+		a /= g;
+		b /= g;
+		if(is_prime[a] && is_prime[b]) printf("%d %d\n",a,b);
+		else if(a == 1 && b == 1) puts("2 2");
+		else puts("impossible");
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif

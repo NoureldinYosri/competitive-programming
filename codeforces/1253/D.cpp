@@ -1,4 +1,3 @@
-#ifdef ACTIVE
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -22,26 +21,59 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 	st << "(" << p.first << ", " << p.second << ")";
 	return st;
 }
-#define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
 
+const int MAX = 1 << 20;
+int id[MAX],W[MAX],mn[MAX],mx[MAX];
 
+int find(int a){
+	return id[a] = (a == id[a]) ? a : find(id[a]);
+}
+
+bool join(int a,int b){
+	a = find(a),b = find(b);
+	if(a == b) return 0;
+	if(W[a] < W[b]) swap(a,b);
+	id[b] = a;
+	W[a] += W[b];
+	mn[a] = min(mn[a],mn[b]);
+	mx[a] = max(mx[a],mx[b]);
+	return 1;
+}
 
 int main(){
 #ifdef HOME
-	freopen("in.in", "r", stdin);
+	freopen("in.in","r",stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	int n,m; scanf("%d %d",&n,&m);
+	for(int i = 1;i <= n;i++){
+		id[i] = i;
+		W[i] = 1;
+		mn[i] = mx[i] = i;
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
+	loop(e,m){
+		int a,b; scanf("%d %d",&a,&b);
+		join(a,b);
+	}
+	
+	vi V;
+	for(int i = 1;i <= n;i++) if(find(i) == i) V.push_back(i);
+	sort(all(V),[](const int & a,const int & b){
+		return mx[a] < mx[b];
+	});
+	int ans = 0;
+	while(!V.empty()){
+		int i = V.back(); V.pop_back();
+		if(find(i) != i) continue;
+		int s = mn[i],e = mx[i];
+		int t = e-1;
+		while(t > s){
+			ans += join(t,i);
+			s = mn[find(i)];
+			t--;
+		}
+	}
+	cout << ans << endl;
 	return 0;
 }
-#endif

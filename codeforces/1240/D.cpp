@@ -1,4 +1,3 @@
-#ifdef ACTIVE
 #include <bits/stdc++.h>
 #define loop(i,n) for(int i = 0;i < (n);i++)
 #define all(A) A.begin(),A.end()
@@ -25,23 +24,27 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+int n;
+int A[1 << 20];
+vi ST;
+int R[1 << 20];
 
+ll solve(){
+	ST.clear();
+	for(int i = n-1;i >= 0;i--) {
+
+	}
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	tc(){
+		scanf("%d",&n);
+		loop(i,n) scanf("%d",A + i);
+		printf("%lld\n",solve());
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
-#endif

@@ -25,23 +25,47 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
 
+const int MAX = 1 << 20;
+int S[MAX];
+ll A[MAX];
+int n;
 
+int sgn(ll x) {
+	return (x > 0) - (x < 0);
+}
 
+int f(int x) {
+	int res = 0;
+	for(int i = max(x-4,0),r = min(x+4,n);i <= r && i+1 < n;i++) {
+		res += S[i] != S[i+1];
+	}
+	return res;
+}
 
 int main(){
-#ifdef HOME
-	freopen("in.in", "r", stdin);
-#endif
-	double h,H,L;
-	cin >> h >> H >> L;
-	double ct = pow(2*h/H,1/3.0);
-	double t = acos(ct);
-	double ans = 0;
-	if(t == t) {
-		ans = H/2*sin(t) - h*tan(t);
+	freopen("pinball.in", "r", stdin);
+	freopen("pinball.out", "w", stdout);
+	scanf("%d",&n);
+	loop(i,n) scanf("%lld",A + i);
+	for(int i = 1;i < n;i++)
+		S[i] = sgn(A[i] - A[i - 1]);
+	int ans = 1;
+	for(int i = 1;i < n;i++)
+		ans += S[i] != S[i - 1];
+	printf("%d\n",ans);
+	int m; scanf("%d",&m);
+	while(m--) {
+		int x,y; scanf("%d %d",&x,&y);
+		x--;
+		ans -= f(x);
+//		cerr << ans << endl;
+		A[x] = y;
+		if(x) S[x] = sgn(A[x] - A[x - 1]);
+		if(x+1 < n) S[x+1] = sgn(A[x+1] - A[x]);
+//		prArr(S,n,int);
+		ans += f(x);
+		printf("%d\n",ans);
 	}
-	ans = min(ans,L);
-	printf("%.10f\n",ans);
 	return 0;
 }
 #endif
