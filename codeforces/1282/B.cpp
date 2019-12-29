@@ -24,54 +24,36 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int n,K;
+ll P;
+int A[1 << 20];
+ll dp[1 << 20];
 
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
-
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
+ll solve(int i){
+	if(i < 0) return 0;
+	ll & ret = dp[i];
+	if(ret != -1) return ret;
+	ret = solve(i-1) + A[i];
+	if(i+1 >= K) ret = min(ret,solve(i-K) + A[i]);
+	return ret;
 }
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
-	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
-		}
+	int T; scanf("%d",&T);
+	while(T--){
+		scanf("%d %lld %d",&n,&P,&K);
+		loop(i,n) scanf("%d",A + i);
+		sort(A,A + n);
+		fill(dp,dp + n,-1);
+		int ans = 0;
+		for(int i = 0;i < n;i++)
+			if(solve(i) <= P)
+				ans = i+1;
+		printf("%d\n",ans);
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
 	return 0;
 }

@@ -24,13 +24,31 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAXN = 200*1000 + 10;
+pi O;
+pi P[MAXN];
+int n;
+int dx[] = {-1,0,1,0};
+int dy[] = {0,1,0,-1};
 
-
+ll dist(pi A,pi B){
+	return abs(A.first - (ll)B.first) + abs(A.second - (ll)B.second);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d %d",&n,&O.first,&O.second);
+	loop(i,n) scanf("%d %d",&P[i].first,&P[i].second);
+	pair<int,pi> ans(0,pi(O.first + 1,O.second));
 	
+	loop(k,4){
+		pi q (O.first + dx[k], O.second + dy[k]);
+		int tmp = 0;
+		loop(i,n) tmp += dist(O,q) + dist(q,P[i]) == dist(O,P[i]);
+		ans = max(ans,pair<int,pi>(tmp,q));
+	}
+	printf("%d\n%d %d\n",ans.first,ans.second.first, ans.second.second);
 	return 0;
 }

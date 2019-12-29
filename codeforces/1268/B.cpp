@@ -24,54 +24,61 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 300*1000 + 10;
 
-const int MAXN = 222;
+const ll oo = 1LL << 60;
+const int B = 4;
+int A[MAX];
 int n;
-char S[MAXN];
-int A[MAXN];
+ll dp[MAX][1 << B];
+bool vis[MAX][1 << B];
 
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
+ll solve(int i,int imsk){
+	if(i == n) return imsk ? -oo : 0;
+	ll & ret = dp[i][imsk];
+	if(vis[i][imsk]) return ret;
+	ret = 0;
+	vis[i][imsk] = 1;
+	
+
+	for(int msk = 0;msk < (1 << B);msk++){
+		if(msk & imsk) continue;
+		int q = -1;
+		bool valid = 1;
+		loop(j,B) {
+			if(msk & (1 << j)) {
+				q = j;
+				if(A[i+1] < j+1) valid = 0;
+			}
+			if(imsk & (1 << j)) q = j;
 		}
+		
+		if(!valid) continue;
+		int h = A[i];
+		if(q >= 0) h -= q + 1;
+		if(h < 0) continue;
+		
+		ret = max(ret,h/2 + solve(i+1,msk) + popcnt(msk));	
 	}
-//	cout << endl;
-	return !p;
+//	cout << i << " " << p1 << " " << p2 << ": " << ret << endl;
+	return ret;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
+	scanf("%d",&n);
+	loop(i,n) scanf("%d",A + i);
+
+	ll ctr[2] = {0};
+	loop(i,n){
+		int a = A[i]/2,b = A[i] - a;
+		if(i&1) swap(a,b);
+		ctr[0] += a;
+		ctr[1] += b;
+	}
+	cout << min(ctr[0],ctr[1]) << endl;
 	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
-		}
-	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
 	return 0;
 }

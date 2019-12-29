@@ -25,12 +25,58 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 5000 + 10,MAXM = 300*1000 + 10;
+vi ord[MAXN];
+int A[MAXN],B[MAXN],C[MAXN];
+int n,m,k;
+bool vis[MAXN][MAXN];
+ll dp[MAXN][MAXN];
+int P[MAXN];
+const ll oo = 1LL << 60;
 
+ll solve(int u,int army){
+	if(army < 0) return -oo;
+	if(u == n) return 0;
+	ll & ret = dp[u][army];
+	if(vis[u][army]) return ret;
+	vis[u][army] = 1;
+	ret = -oo;
+	if(army >= A[u]){
+		ll val = 0;
+		int narmy = army + B[u];
+		ret = solve(u+1,narmy);
+		for(int v : ord[u]){
+			val += C[v];
+			narmy--;
+			ret = max(ret,solve(u+1,narmy) + val); 
+		}
+	}
+	return ret;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d %d",&n,&m,&k);
+	loop(i,n) {
+		scanf("%d %d %d",A + i,B + i,C + i);
+		P[i] = i;
+	}
+	loop(e,m){
+		int u,v; scanf("%d %d",&u,&v);
+		u--,v--;
+		P[v] = max(P[v],u);
+	}
+	loop(i,n) ord[P[i]].push_back(i);
+	loop(i,n){
+		sort(all(ord[i]),[](const int & a,const int & b){
+			return C[a] > C[b];
+		});
+	}
 	
+	ll ans = solve(0,k);
+	if(ans < 0) ans = -1;
+	cout << ans << endl;
 	return 0;
 }

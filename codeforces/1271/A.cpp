@@ -26,11 +26,23 @@ using namespace std;
 
 
 
+int ties,scarves,vests,jackets;
+int e,f;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	cin >> ties >> scarves >> vests >> jackets;
+	cin >> e >> f;
+	ll ans = 0;
+	for(ll a = 0;a <= ties && a <= jackets;a++){
+		ll tmp = a*e;
+		ll b = jackets - a;
+		b = min(b,min(scarves,vests) + 0LL);
+		tmp += b*f;
+		ans = max(ans,tmp);
+	}
+	cout << ans << endl;
 	return 0;
 }

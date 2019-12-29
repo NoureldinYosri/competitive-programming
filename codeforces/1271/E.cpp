@@ -24,13 +24,91 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+ll n,K;
 
+vi N;
+vi pref;
+const int MAXB = 70;
+ll dp[MAXB][MAXB][2];
+int vis[MAXB][MAXB][2],visNum;
 
+vi conv(ll x){
+	if(!x) return vi();
+	vi ret;
+	while(x){
+		ret.push_back(x&1);
+		x >>= 1;
+	}
+	reverse(all(ret));
+	return ret;
+}
+
+ll solve(int i,int j,bool are_eq){
+	if(i == sz(N) && j == sz(pref)) return 1;
+	if(i == sz(N)) return 0;
+	ll & ret = dp[i][j][are_eq];
+	if(vis[i][j][are_eq] == visNum) return ret;
+	ret = 0;
+	vis[i][j][are_eq] = visNum;
+	
+	int cand[2] = {-1,-1};
+	
+	if(j < sz(pref))cand[0] = pref[j];
+	else {
+		cand[0] = 0;
+		cand[1] = 1;
+	}
+	loop(k,2) if(cand[k] != -1){
+		int d = cand[k];
+		if(are_eq && d > N[i]) continue;
+		ret += solve(i+1,j+(j < sz(pref)),are_eq && d == N[i]);
+	}
+	
+	if(j == 0) ret += solve(i+1,0,are_eq && (N[i] == 0));
+	
+	return ret;
+}
+
+ll f(ll val){
+	pref = conv(val);
+	visNum++;
+	return solve(0,0,1);
+}
+
+ll solveEven(){
+	ll s = 1,e = n/2;
+	if(e < s) return 0;
+	if(f(2) + f(3) < K) return 0;
+	while(s < e){
+		ll m = s + (e-s+1)/2;
+		if(f(2*m) + f(2*m+1) >= K) s = m;
+		else e = m-1;
+	}	
+	return 2*s;
+}
+
+ll solveOdd(){
+	ll s = 0,e = n/2;
+	while(2*e+1 > n) e--;
+//	cout << s << " " << e << endl;
+	if(e < s) return 0;
+	
+	while(s < e){
+		ll m = s + (e-s+1)/2;
+		if(f(2*m+1) >= K) s = m;
+		else e = m-1;
+	}
+	return 2*s + 1;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	cin >> n >> K;
+	N = conv(n);
+	cout << max(solveEven(),solveOdd()) << endl;
+//	cout << f(2) << " " << f(3) << endl;
+//	cout << solveEven() << endl;
 	return 0;
 }

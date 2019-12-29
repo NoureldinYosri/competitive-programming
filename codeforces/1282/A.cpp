@@ -25,53 +25,20 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
 
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
-}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
-	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
-		}
+	int T; scanf("%d",&T);
+	while(T--){
+		ll a,b,c,r; scanf("%lld %lld %lld %lld",&a,&b,&c,&r);
+		ll s = c - r,e = c + r;
+		ll A = min(a,b), B = max(a,b);
+		ll ans = B-A - max(min(e,B) - max(s,A),0LL);
+//		if(s <= a && a <= e) ans++;
+		printf("%lld\n",ans);
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
 	return 0;
 }

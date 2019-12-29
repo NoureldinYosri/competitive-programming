@@ -25,53 +25,45 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
+int n,m;
 
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
-}
+set<int> forbidden;
+queue<pair<int,pi> > cand;
+
+vi pos;
+ll ans = 0;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
-	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
+	scanf ("%d %d",&n,&m);
+	for(int i = 0;i < n;i++){
+		int x; scanf("%d",&x);
+		forbidden.insert(x);
+		for(int dx = -1;dx <= 1; dx += 2)
+			cand.emplace(1, pi(x + dx, dx));
+	}
+	for(int i = 0;i < m;i++){
+		while(1){
+			auto tmp = cand.front();
+			int x = tmp.second.first;
+			if(forbidden.count(x)){
+				cand.pop();
 			}
-			else res = new vi(tmp);
+			else break;
 		}
+		auto tmp = cand.front();
+		cand.pop();
+		int d = tmp.first;
+		int x = tmp.second.first;
+		pos.push_back(x);
+		forbidden.insert(x);
+		int dx = tmp.second.second;
+		ans += d;
+		cand.emplace(d + 1, pi(x + dx, dx));
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
+	printf("%lld\n",ans);
+	for(int x : pos) printf("%d ",x);
 	return 0;
 }

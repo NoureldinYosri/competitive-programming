@@ -24,54 +24,50 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
-
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
-}
+int n,k;
+vi A,B;
+char buffer[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
-	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
+	scanf("%d %d",&n,&k);
+	scanf("%s",buffer);
+	loop(i,n){
+		int d = buffer[i] - '0';
+		A.push_back(d);
+		B.push_back(-1);
+	}
+	for(int i = 0;i < k;i++){
+		int d = A[i];
+		for(int j = i;j < n;j += k)
+			B[j] = d;
+	}
+	if(B < A){
+		int p = k-1;
+		while(p >= 0 && B[p] == 9) p--;
+		if(p == -1){
+			B = vi(n+1,0);
+			for(int i = 0;i < sz(B);i += k)
+				B[i] = 1;
+		}
+		else {
+			int d = B[p] + 1;
+			for(int i = p;i < n;i += k)
+				B[i] = d;
 		}
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
+	if(sz(A) == sz(B)){
+		int p = 0;
+		while(p < k && B[p] == A[p]) p++;
+		for(int i = p+1;i < k;i++)
+			for(int j = i;j < n;j += k)
+				B[j] = 0;		
 	}
-	else puts("-1");
+	printf("%d\n",sz(B));
+	for(int x : B)
+		printf("%d",x);
+	puts("");
 	return 0;
 }

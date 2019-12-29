@@ -25,53 +25,58 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-const int MAXN = 222;
+const int MAX = 200*1000 + 10;
 int n;
-char S[MAXN];
-int A[MAXN];
+int X[MAX];
 
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
+pi dp[MAX][8];
+
+int interpret(int msk, int x0, int x){
+	if(x == -1) return 0;
+	int ret = 0;
+	for(int p = x0-1; p <= x0 + 1;p++){
+		int i = p - x0 + 1;
+		if(!(msk & (1 << i))) continue;
+		int j = p - x;
+		assert(j <= 1);
+		if(j < -1) continue;
+		ret |= 1 << (j + 1);
 	}
-//	cout << endl;
-	return !p;
+	return ret;
+}
+
+pi solve(int pos,int msk){
+	if(pos == n) return pi(0,0);
+	pi & ret = dp[pos][msk];
+	if(ret != pi(-1,-1)) return ret;
+	ret = pi(INT_MAX,0);
+	msk = interpret(msk,pos ? X[pos-1] : -1, X[pos]);
+	
+	for(int i = -1;i <= 1;i++){
+		int b = 1 << (i+1);
+		int d = (msk & b) ? 0 : 1;
+		pi q = solve(pos+1, msk | b);
+		q.first += d;
+		q.second += d;
+		ret.first = min(ret.first,  q.first);
+		ret.second = max(ret.second, q.second);
+	}
+	
+	return ret;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
+	scanf("%d",&n);
+	loop(i,n) scanf("%d",X + i);
+	sort(X, X + n);
 	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
-		}
-	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
+	fill(dp[0],dp[MAX],pi(-1,-1));
+	pi p = solve(0,0);
+	printf("%d %d\n",p.first, p.second);
+	
+	
 	return 0;
 }

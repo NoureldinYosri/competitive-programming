@@ -24,54 +24,35 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int N = 300;
 
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
-
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
+int ask(string s){
+	cout << s << endl;
+	fflush(stdout);
+	int r; cin >> r;
+	if(r <= 0) exit(0);
+	return r;
 }
 
+
 int main(){
-#ifdef HOME
-	freopen("in.in", "r", stdin);
-#endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
+	int ca = N - ask(string(N,'a')); 
+	int cb = N - ask(string(N,'b')); 
+	int n = ca + cb;
 	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
+	if(!ca) ask(string(n,'b'));
+	else if(!cb) ask(string(n,'a'));
+	
+	string S(n,'b');
+	int f = ca;
+	for(int i = 0;i < n;i++){
+		S[i] = 'a';
+		int g = ask(S);
+		if(g < f){
+			f = g;
 		}
+		else S[i] = 'b';
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
+	ask(S);
 	return 0;
 }

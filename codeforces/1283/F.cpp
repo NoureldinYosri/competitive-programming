@@ -24,54 +24,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
-const int MAXN = 222;
+const int MAX = 200*1000 + 10;
+int out_deg[MAX];
+vi ord;
 int n;
-char S[MAXN];
-int A[MAXN];
-
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
-}
+bool taken[MAX];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
+	scanf("%d",&n);
+	if(n == 1){
+		puts("1");
+		return 0;
+	}
+	loop(i,n-1) {
+		int x; scanf("%d",&x);
+		out_deg[x]++;
+		ord.push_back(x);
+	}
+	set<pi> S;
+	for(int u = 1;u <= n;u++)
+		if(!out_deg[u])
+			S.emplace(u,u);
 	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
-			}
-			else res = new vi(tmp);
-		}
+	int R = ord[0];
+	printf("%d\n",R);
+	while(!ord.empty()) {
+		int u = ord.back(); ord.pop_back();
+		pi p = *S.begin(); S.erase(S.begin());
+		int val = max(u,p.first);
+		int v = p.second;
+		printf("%d %d\n",u,v);
+		out_deg[u]--;
+		if(!out_deg[u])
+			S.emplace(val ,u);
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
 	return 0;
 }

@@ -24,54 +24,43 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int n,T,a,b; 
+pi P[1 << 20];
 
-const int MAXN = 222;
-int n;
-char S[MAXN];
-int A[MAXN];
-
-bool solve(vi & tmp){
-	int p = 0;
-	loop(i,n){
-		int x = A[i] ^ p;
-//		cout << x << " ";
-		p = 0;
-		if(x) {
-			p = 1;
-			tmp.push_back(i+1);
-		}
-	}
-//	cout << endl;
-	return !p;
+int getCount(int T,int *cnt){
+	if(T < 0) return 0;
+	int d1 = min(T/a,cnt[0]);
+	int d2 = min((T-d1*a)/b,cnt[1]);
+	return d1 + d2;	
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d %s",&n,S);
-	loop(i,n) A[i] = S[i] == 'W';
-	
-	bool f = 0;
-	vi *res = 0;
-	loop(p,2){
-		loop(i,n) A[i] ^= p;
-		vi tmp;
-		if(solve(tmp)){
-			f = 1;
-			if(res) {
-				if(tmp.size() < res->size())
-					res = new vi(tmp);
+	int m; scanf("%d",&m);
+	while(m--){
+		scanf("%d %d %d %d",&n,&T,&a,&b);
+		loop(i,n) scanf("%d",&P[i].second);
+		loop(i,n) scanf("%d",&P[i].first);
+		sort(P,P + n);
+		int cnt[2] = {0};
+		loop(i,n) cnt[P[i].second]++;
+		ll duration = 0;
+		int ans = getCount(P[0].first - 1,cnt);
+		for(int i = 0;i < n;){
+			int j = i;
+			int t = P[i].first;
+			while(j < n && P[j].first == t){
+				duration += P[j].second ? b : a;
+				cnt[P[j].second]--;
+				j++;
 			}
-			else res = new vi(tmp);
+			int nt = (j < n) ? (P[j].first-1) : T;
+			if(duration <= nt) ans = max(ans, j + getCount(nt - duration, cnt));			
+			i = j;
 		}
+		printf("%d\n",ans);
 	}
-	if(f){
-		vi ans = *res;
-		printf("%d\n",sz(ans));
-		for(int x : ans) printf("%d ",x);
-		puts("");
-	}
-	else puts("-1");
 	return 0;
 }
