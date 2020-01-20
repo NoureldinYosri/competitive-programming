@@ -25,38 +25,39 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+string S;
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
-}
+int cnt[26];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	cin >> S;
+	for(char c : S) cnt[c - 'a']++;
+	int odd_cnt = 0, even_cnt = 0;
+	loop(c, 26) {
+		odd_cnt += cnt[c] & 1;
+		if(cnt[c]) even_cnt += 1 - (cnt[c] & 1);
 	}
+	if(odd_cnt > 1 || even_cnt == 1 || sz(S) == 1) {
+		puts("Impossible");
+		return 0;
+	}
+	
+	string Z(S);
+	reverse(all(Z));
+	if(S == Z){
+		printf("%d\n", 1 + (sz(S)%2));
+		return 0;
+	}
+	
+	int odd_char = -1;
+	loop(c, 26) if(cnt[c]&1) odd_char = c;
+	
+	if(odd_char != -1){
+		
+	}
+	
 	return 0;
 }

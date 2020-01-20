@@ -24,27 +24,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int A[1 << 20];
+int n;
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
+bool solve(){
+	ll tot_sum = 0;
+	loop(i, n) tot_sum += A[i];
+	ll mx = 0;
+	ll sum = 0;
+	int ctr = 0;
+	loop(i,n){
+		ctr++;
+		sum += A[i];
+		if(ctr < n)
+			mx = max(mx, sum);
+		if(sum <= 0){
+			sum = 0;
+			ctr = 0;
 		}
-		else S.erase(A[i]);
-		ans++;
 	}
-	return ans;
+	reverse(A,A + n);
+	sum = 0;
+	ctr = 0;
+	loop(i,n){
+		ctr++;
+		sum += A[i];
+		if(ctr < n)
+			mx = max(mx, sum);
+		if(sum <= 0){
+			sum = 0;
+			ctr = 0;
+		}
+	}
+	return mx < tot_sum;
 }
+
+
 
 int main(){
 #ifdef HOME
@@ -52,11 +67,9 @@ int main(){
 #endif
 	int T; scanf("%d",&T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		scanf("%d",&n);
+		loop(i,n) scanf("%d", A + i);
+		puts(solve() ? "YES" : "NO");
 	}
 	return 0;
 }

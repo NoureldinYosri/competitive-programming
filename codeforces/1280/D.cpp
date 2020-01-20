@@ -24,27 +24,40 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const ll oo = 1LL << 60;
+using pl = pair<int,ll>;
+const int MAX = 3111;
+int n;
+vi G[MAX];
+pl dp[MAX][MAX],aux[MAX][MAX];
+int wasb[MAX],ant[MAX];
+int siz[MAX];
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
+void dfs(int u,int p){
+	dp[u][0] = pl(0,-oo);
+	dp[u][1] = pl(0, wasb[u] - ant[u]);
+	siz[u] = 1;
+	for(int v : G[u]) if(v != p){
+		dfs(v,u);
+		loop(i,siz[u] + siz[v]+1) aux[u][i] = pl(0, -oo);
+		for(int s = 1;s <= siz[u];s++){
+			for(int k = 1;k <= siz[v];k++){
+				pl A = dp[u][s], B = dp[v][k];
+				aux[u][s+k] = max(aux[u][s+k], pl(A.first + B.first + (B.second > 0), A.second));
+				int val = A.first + B.first;
+				aux[u][s+k-1] = max(aux[u][s+k-1], pl(val, A.second + B.second));
 			}
-			j++;
 		}
-		else S.erase(A[i]);
-		ans++;
+		siz[u] += siz[v];
+		copy(aux[u],aux[u] + siz[u] + 1,dp[u]);
 	}
-	return ans;
+/*	cout << u << ": ";
+	for(auto p : dp[u]) cout << p;
+	cout << endl;
+	* */
 }
+
+
 
 int main(){
 #ifdef HOME
@@ -52,11 +65,17 @@ int main(){
 #endif
 	int T; scanf("%d",&T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		int m; scanf("%d %d",&n,&m);
+		loop(i,n+1) G[i].clear();
+		for(int i = 1;i <= n;i++) scanf("%d", ant+i);
+		for(int i = 1;i <= n;i++) scanf("%d", wasb+i);
+		loop(i,n-1){
+			int a,b; scanf("%d %d",&a,&b);
+			G[a].pb(b);
+			G[b].pb(a);
+		}
+		dfs(1, 0);
+		printf("%d\n", dp[1][m].first + (dp[1][m].second > 0));
 	}
 	return 0;
 }

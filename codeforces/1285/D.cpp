@@ -24,39 +24,58 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAXB = 30, MAXN = 100*1000 + 10, MAX = MAXB * MAXN + MAXN;
+int trie[MAX][2],tsize = 1;
+int depth[MAX];
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
+void insert(int x){
+	int cur = 0;
+	for(int i = 0;i < MAXB;i++){
+		int b = (x >> (MAXB - 1 - i)) & 1;
+		if(trie[cur][b] == -1) {
+			depth[tsize] = depth[cur] + 1;
+			trie[cur][b] = tsize++;
 		}
-		else S.erase(A[i]);
-		ans++;
+		cur = trie[cur][b];
 	}
-	return ans;
+}
+
+ll dp[MAX];
+
+ll solve(int cur){
+	if(cur == -1) return 0;
+	ll & ret = dp[cur];
+	if(ret != -1) return ret;
+	ret = 1LL << 60;
+	int i = MAXB - 1 - depth[cur];
+	ll bit = 1LL << i;
+	
+	for(int c = 0;c < 2;c++){
+		ll tmp = 0;
+		loop(j, 2){
+			if(trie[cur][j] == -1) continue;
+			ll aux = solve(trie[cur][j]);
+			if((c^j)) aux |= bit;
+			tmp = max(tmp, aux);
+		}
+		ret = min(ret, tmp);
+	}
+//	cout << cur << " " << ret << " " << trie[cur][0] << " " << trie[cur][1] << endl;
+
+	return ret;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	memset(trie, -1, sizeof trie);
+	int n; scanf("%d",&n);
+	loop(i,n){
+		int x; scanf("%d",&x);
+		insert(x);
 	}
+	memset(dp, -1, sizeof dp);
+	cout << solve(0) << endl;
 	return 0;
 }

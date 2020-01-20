@@ -24,39 +24,53 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAXA = 100*1000 + 1;
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+int prime[MAXA];
+vi primes[MAXA];
+int prime_cnt[MAXA];
+int canon[MAXA];
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
+void sieve(){
+	canon[1] = 1;
+	for(int i = 2;i < MAXA;i++){
+		if(!prime[i]){
+			prime[i] = i;
+			for(ll j = i*(ll)i;j < MAXA;j += i)
+				prime[j] = i;
 		}
-		else S.erase(A[i]);
-		ans++;
+		int p = prime[i];
+		int n = i,e = 0;
+		while(n%p == 0) n /= p, e++;
+		prime_cnt[i] = prime_cnt[n] + 1;
+		for(int q : primes[n])
+			primes[i].pb(q);
+		primes[i].pb(p);
+		sort(all(primes[i]));
+		canon[i] = canon[n] * p;
 	}
-	return ans;
+//	cerr << "#p " << *max_element(prime_cnt, prime_cnt + MAXA) << endl;
 }
+
+int cnt[MAXA];
+int A[1 << 20], n;
+
+bool bad[MAXA];
+bool taken[MAXA];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	scanf("%d",&n);
+	loop(i,n) {
+		scanf("%d",A + i);
 	}
+	ll ans = -1;
+	loop(i,n) loop(j, i){
+		ll g = A[i]*(ll)(A[j]/__gcd(A[i], A[j]));
+		ans = max(ans, g);
+	}
+	cout << ans << endl;
 	return 0;
 }

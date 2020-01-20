@@ -31,6 +31,18 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-
+	int T; scanf("%d",&T);
+	while(T--){
+		int A[3];
+		loop(i,3) scanf("%d",A + i);
+		sort(A,A + 3);
+		int s = A[0] + A[1] + A[2];
+		bool y = 1;
+		loop(i,3){
+			int a = A[i];
+			if(a > s-a+1) y = 0;
+		}
+		puts(y ? "YES" : "NO");
+	}
 	return 0;
 }

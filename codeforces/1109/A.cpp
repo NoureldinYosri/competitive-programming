@@ -25,38 +25,37 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+vi IDX[1 << 20];
+int n;
+int A[1 << 20];
+int B[1 << 20];
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
+ll C(ll n){
+	return (n*(n-1))/2;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	scanf("%d",&n);
+	IDX[0].push_back(0);
+	int b = 0;
+	for(int i = 1;i <= n;i++){
+		int x; scanf("%d", &x);
+		A[i] = x;
+		b ^= x;
+		IDX[b].push_back(i);
+		B[i] = b;
 	}
+	ll res = 0;
+	for(int x = 0;x < (1 << 20);x++){
+		const vi & V = IDX[x];
+		int cnt[2] = {0};
+		for(int v : V) cnt[v&1]++;
+		res += C(cnt[0]) + C(cnt[1]);
+	}
+	cout << res << endl;
+	
 	return 0;
 }

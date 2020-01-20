@@ -25,12 +25,58 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int mod = 998244353 ;
+int add(int a, int b){
+	a += b;
+	if(a >= mod) a -= mod;
+	if(a < 0) a += mod;
+	return a;
+}
+int mul(int a, int b){
+	return (a*(ll)b)%mod;
+}
+int powmod(int a, int p){
+	if(p == 0) return 1;
+	int b = 1;
+	for(;p > 1; p >>= 1){
+		if(p & 1) b = mul(a, b);
+		a = mul(a, a);
+	}
+	return mul(a, b);
+}
+int inv(int a){
+	return powmod(a, mod - 2);
+}
 
+
+vi kid_presents[1 << 20];
+int present_child_cnt[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	int n;
+	scanf("%d",&n);
+	loop(i,n){
+		int m; scanf("%d",&m);
+		loop(j,m) {
+			int x; scanf("%d",&x);
+			kid_presents[i].push_back(x);
+			present_child_cnt[x] ++;
+		}
+	}
 	
+	int in = inv(n);
+	int ans = 0;
+	loop(i,n) {
+		int im = inv(kid_presents[i].size());
+		int p = mul(in, im);
+		for(int j : kid_presents[i]){
+			int q = mul(p, mul(present_child_cnt[j], in));
+			ans = add(ans, q);
+		}
+	}
+	cout << ans << endl;
 	return 0;
 }

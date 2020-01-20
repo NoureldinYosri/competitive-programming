@@ -24,26 +24,17 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int ctr[10];
+char buffer[200];
+int n;
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
+bool solve(){
+	if(!ctr[0]) return 0;
+	ctr[0] --;
+	int s = 0;
+	loop(d,10) s = (s + d*ctr[d])%6;
+	loop(d,10) if(ctr[d] && (4*s)%6 == (3*d)%6) return 1;
+	return 0;
 }
 
 int main(){
@@ -52,11 +43,11 @@ int main(){
 #endif
 	int T; scanf("%d",&T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		scanf("%s",buffer);
+		n = strlen(buffer);
+		fill(ctr, ctr + 10, 0);
+		loop(i,n) ctr[buffer[i] - '0']++;
+		puts(solve() ? "red" : "cyan");
 	}
 	return 0;
 }

@@ -25,38 +25,51 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
+int add(int a, int b, int mod){
+	a += b;
+	if(a >= mod) a -= mod;
+	if(a < 0) a += mod;
+	return a;
 }
+int mul(int a, int b, int mod){
+	return (a*(ll)b)%mod;
+}
+int powmod(int a, int p, int mod){
+	if(p == 0) return 1;
+	int b = 1;
+	for(;p > 1; p >>= 1){
+		if(p & 1) b = mul(a, b, mod);
+		a = mul(a, a, mod);
+	}
+	return mul(a, b, mod);
+}
+int inv(int a, int mod){
+	return powmod(a, mod - 2, mod);
+}
+
+const int mod = 998244353;
+const int inv100 = inv(100, mod);
+
+int n;
+int P[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	scanf("%d",&n);
+	loop(i, n) scanf("%d",&P[i]);
+	reverse(P, P + n);
+	int a = 0, b = 0;
+	loop(i, n){
+		int p = mul(P[i], inv100, mod);
+		a = mul(a, p, mod);
+		b = mul(b, p, mod);
+		int rp = add(1, -p, mod);
+		a = add(a, rp, mod);
+		b = add(b, 1, mod);
 	}
+	int e = mul(b, inv(add(1, -a, mod), mod), mod);
+	cout << e << endl;
 	return 0;
 }

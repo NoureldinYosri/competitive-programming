@@ -24,26 +24,50 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int mod = 1e9 + 7;
+int add(int a,int b){
+	a += b;
+	if(a >= mod) a -= mod;
+	if(a < 0) a += mod;
+	return a;
+}
+int mul(int a,int b){
+	return (a*(ll)b)%mod;
+}
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+char buffer[1 << 20];
+string S;
+int n,x;
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
+int solve(){
+	n = S.size();
+	if(n == 1) return 1;
+	int l = 0;
+	int len = sz(S);
+	while(sz(S) < x){
+		l++;
+		int num = S[l-1] - '0';
+		num--;
+		int s = l,e = sz(S);
+		while(sz(S) < x && num){
+			num--;
+			for(int i = s;i < e;i++)
+				S.push_back(S[i]);
 		}
-		else S.erase(A[i]);
-		ans++;
+		len = add(sz(S), mul(num, e-s));
 	}
-	return ans;
+	
+//	cout << S << " " << len << endl;
+//	cout << l << " " << x << endl;
+		
+	for(;l < x;){
+		l++;
+		int pref_val = S[l-1] - '0';
+		int suff_len = add(len, -l);
+//		cout << l << ": " << pref_val << " " << suff_len << endl;
+		len = add(l, mul(pref_val, suff_len));
+	}
+	return len;
 }
 
 int main(){
@@ -52,11 +76,9 @@ int main(){
 #endif
 	int T; scanf("%d",&T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		scanf("%d %s",&x,buffer);
+		S = string(buffer);
+		printf("%d\n",solve());
 	}
 	return 0;
 }

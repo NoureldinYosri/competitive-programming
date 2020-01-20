@@ -25,38 +25,34 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
-}
+
+
+const int MAX = 400;
+vi E[MAX];
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	int n1, n2, m, r, b;
+	scanf("%d %d %d %d %d", &n1, &n2, &m, &r, &b);
+	vi C(3*m, 0);
+	vector<vi> 
+	
+	loop(e,m){
+		int s = 3*e;
+		C[s] = r;
+		C[s + 1] = b;
 	}
+	
+	loop(e,m){
+		
+	}
+	
+	
+	
+	
 	return 0;
 }

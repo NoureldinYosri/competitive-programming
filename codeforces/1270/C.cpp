@@ -25,26 +25,10 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
-}
+ll S;
+ll A;
+int n;
+ll B;
 
 int main(){
 #ifdef HOME
@@ -52,11 +36,37 @@ int main(){
 #endif
 	int T; scanf("%d",&T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		S = A = 0;
+		scanf("%d",&n);
+		loop(i,n){
+			scanf("%lld",&B);
+			S += B;
+			A ^= B;
+		}
+		A <<= 1;
+		
+		if(S == A){
+			puts("0");
+			continue;
+		}
+		else {
+			puts("1");
+			int i = 0;
+			ll x = 0;
+			while(S != A){
+				int b1 = S & 1;
+				int b2 = A & 1;
+				if(b1 != b2){
+					x |= 1LL << i;
+					S ++;
+					A ^= 2;
+				}
+				i++;
+				S >>= 1;
+				A >>= 1;
+			}
+			printf("%lld\n",x);
+		}
 	}
 	return 0;
 }

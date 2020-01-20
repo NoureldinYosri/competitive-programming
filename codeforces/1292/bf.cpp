@@ -24,39 +24,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 1024;
+int state[3][MAX];
+bool vis[3][MAX];
+int n;
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
+bool dfs(int r, int c){
+	if(r < 1 || c < 1) return 0;
+	if(r > 2 || c > n) return 0;
+//	cout << r << " " << c << " " << n << endl;
+	
+	if(state[r][c]) return 0;
+	if(r == 2 && c == n) return 1;
+	if(vis[r][c]) return 0;
+	vis[r][c] = 1;
+	for(int i = -1;i <= 1;i++)
+		for(int j = -1; j<= 1; j++)
+			if(abs(i) + abs(j) == 1)
+				if(dfs(r+i, c + j))
+					return 1;
+	return 0;
 }
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+
+	int m;
+	cin >> n >> m;
+	while(m--){
+		int r,c; cin >> r >> c;
+		state[r][c] ^= 1;
+		memset(vis, 0, sizeof vis);
+		puts(dfs(1,1) ? "YES" : "NO");
 	}
 	return 0;
 }

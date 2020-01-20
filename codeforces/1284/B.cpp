@@ -25,38 +25,43 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
+pair<bool,pi> read(){
+	int n; scanf("%d",&n);
+	int mx = INT_MIN, mn = INT_MAX;
+	bool f = 0;
+	loop(i,n){
+		int x; scanf("%d",&x);
+		if(i && x > mn) f = 1;
+		mn = min(mn, x);
+		mx = max(mx, x);
 	}
-	return ans;
+	return make_pair(f, pi(mn, mx));
 }
+
+
+
+vector<pi> V;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	int n; scanf("%d",&n);
+	ll ans = 0;
+	ll m = 0;
+	loop(i,n){
+		auto info = read();
+		if(info.first) m++;
+		else V.push_back(info.second);
 	}
+	ans += 2 * m * sz(V) + m*m;
+	sort(all(V));
+	for(auto p : V){
+		int mx = p.second;
+		auto E = upper_bound(all(V), pi(mx,INT_MIN)); 
+		ans += E - V.begin();
+	}
+
+	cout << ans << endl;
 	return 0;
 }

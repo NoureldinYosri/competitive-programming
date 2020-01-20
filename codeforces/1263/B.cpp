@@ -24,39 +24,46 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+char S[10][10];
+int n;
+int dp[4][1 << 10];
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
+int solve(int p, int msk) {
+	if(!msk || (msk == LSOne(msk))) return 0;
+	if(p == 4) return 1 << 29;
+	int & ret = dp[p][msk];
+	if(ret != -1) return ret;
+	vi V,who[10];
+	for(int i = 0,j = 0;i < n;i++)
+		if(msk & (1 << i)){
+			V.push_back(i);
+			who[S[i][j]-'0'].push_back(i);
 		}
-		else S.erase(A[i]);
-		ans++;
+	
+	ret = 1 << 29;
+	for(char c = '0'; c <= '9'; c++){
+		int smsk = 0;
+		int tmp = sz(V);
+		for(int i : V)
+			if(S[i][p] == c)
+				smsk |= 1 << i,tmp--;
+		ret = min(ret, solve(smsk) + tmp);
 	}
-	return ans;
+	
+	
+	return ret;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
+	int T; scanf("%d", &T);
 	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+		scanf("%d",&n);
+		loop(i,n) scanf("%s", S[i]);
+		memset(dp, -1, sizeof dp);
+		printf("%d\n", solve(0, (1 << n) - 1));
 	}
 	return 0;
 }

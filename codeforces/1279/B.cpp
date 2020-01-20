@@ -24,13 +24,27 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
+int n,s;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d",&T);
+	while(T--){
+		scanf("%d %d",&n,&s);
+		ll sum = 0;
+		pi mx (0,0);
+		int ans = 0;
+		loop(i,n){
+			int x; scanf("%d",&x);
+			sum += x;
+			mx = max(mx, pi(x,i+1));
+			if(sum-mx.first <= s) ans = mx.second;
+			if(sum <= s) ans = 0;
+		}
+		printf("%d\n",ans);
+	}
 	return 0;
 }

@@ -25,38 +25,30 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+vector<string> S,T;
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
+void read(vector<string> & A, int n){
+	char buffer[1 << 20];
+	loop(i,n){
+		scanf("%s",buffer);
+		A.emplace_back(buffer);
 	}
-	return ans;
 }
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	int n,m;
+	scanf("%d %d",&n,&m);
+	read(S,n);
+	read(T,m);
+	int q; scanf("%d",&q);
+	while(q--){
+		int x; scanf("%d",&x);
+		x--;
+		printf("%s%s\n",S[x%n].c_str(),T[x%m].c_str());
 	}
 	return 0;
 }

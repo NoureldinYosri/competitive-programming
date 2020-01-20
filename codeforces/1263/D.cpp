@@ -24,39 +24,47 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int id[1 << 20];
+int W[1 << 20];
+int n;
+char buffer[1 << 20];
+vi who[128];
 
-int n,m;
-int A[1 << 20], B[1 << 20];
-
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
-	}
-	return ans;
+int find(int a){
+	return id[a] = (a == id[a]) ? a : find(id[a]);
+}
+void join(int a,int b){
+	a = find(a);
+	b = find(b);
+	if(a == b) return;
+	n--;
+	if(W[a] < W[b]) swap(a, b);
+	id[b] = a;
+	W[a] += W[b];
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	scanf("%d",&n);
+	loop(i,n){
+		scanf("%s",buffer);
+		int m = strlen(buffer);
+		sort(buffer,buffer + m);
+		m = unique(buffer, buffer + m) - buffer;
+		buffer[m] = 0;
+		loop(j,m)  who[(int)buffer[j]].pb(i);
 	}
+	loop(i,n) id[i] = i, W[i] = 1;
+	
+	for(char c = 'a'; c <= 'z'; c++){
+		int u = -1;
+		for(int v : who[(int)c]){
+			if(u != -1) join(u, v);
+			u = v;
+		}
+	}
+	cout << n << endl;
 	return 0;
 }

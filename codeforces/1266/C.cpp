@@ -24,39 +24,59 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 500 + 10;
+ll A[MAX][MAX];
 
-int n,m;
-int A[1 << 20], B[1 << 20];
+vi primes;
 
-ll solve(){
-	set<int> S;
-	ll ans = 0;
-	for(int i = 0, j = 0; i < n;i++){
-		if(!S.count(A[i])){
-			ans += 2*sz(S);
-			for(;B[j] != A[i];j++){
-				ans += 2;
-				S.insert(B[j]);
-			}
-			j++;
-		}
-		else S.erase(A[i]);
-		ans++;
+void init(){
+	for(int i = 2;sz(primes) < MAX;i++){
+		bool is_prime = 1;
+		for(int j = 2;j*j <= i && is_prime;j ++)
+			if(i%j == 0)
+				is_prime = 0;
+		if(is_prime) primes.push_back(i);
 	}
-	return ans;
+}
+
+vector<vi> solve(int m, int n){
+	vector<vi> ret;
+	if(n == 1){
+		loop(i,m) {
+			ret.push_back(vi{i+2});
+		}
+		return ret;
+	}
+	ret.emplace_back();
+	loop(i, n) ret.back().push_back(2*i+2);
+	for(int i = 2;i <= m;i++){
+		ret.emplace_back();
+		ret.back().push_back(2*i-1);
+		for(int j = 1;j < n;j++){
+			int a = ret.back()[0];
+			int b = ret[0][j];
+			ret.back().push_back(a*(b/__gcd(a,b)));
+		}
+	}
+	return ret;
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	int T; scanf("%d",&T);
-	while(T--){
-		scanf("%d %d",&n,&m);
-		swap(n, m);
-		loop(i,m) scanf("%d", B + i);
-		loop(j,n) scanf("%d", A + j);
-		printf("%lld\n",solve());
+	int R,C; cin >> R >> C;
+	if(R*C == 1) {
+		puts("0");
+		return 0;
+	}
+	init();
+	vector<vi> res = solve(max(R,C), min(R,C));
+	if(R < C){
+		loop(r, R) loop(c, C) printf("%d%c", res[c][r], " \n"[c==C-1]);
+	}
+	else {
+		loop(r, R) loop(c, C) printf("%d%c", res[r][c], " \n"[c==C-1]);
 	}
 	return 0;
 }
