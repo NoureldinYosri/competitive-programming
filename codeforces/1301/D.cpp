@@ -24,48 +24,56 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+int n, m, k;
 
-vector<ll> P;
+string path;
 
+void create(int i, int j){
+	if(i && j) {
+		path.pb('U');
+		path.pb('D');
+	}
+	if(j+1 < m) {
+		path.pb('R');
+		create(i, j+1);
+	}
+	if(j) {
+		path.pb('L');
+		return;
+	}
+	if(i+1 < n){
+		path.pb('D');
+		create(i+1, 0);
+	}
+	if(i) path.pb('U');
+}
+
+vector<pair<int, string>> res;
+
+void compress(){
+	for(int i = 0;i < sz(path);){
+		string tmp;
+		while(i < sz(path) && sz(tmp) < 3)
+			tmp.pb(path[i++]);
+		if(!res.empty() && res.back().second == tmp) res.back().first++;
+		else res.emplace_back(1, tmp);
+	}
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	cin >> n >> m >> k;
+	create(0, 0);
+	if(sz(path) < k) puts("NO");
+	else {
+		puts("YES");
+		path = path.substr(0, k);
+		compress();
+		printf("%d\n", sz(res));
+		assert(sz(res) <= 3000);
+		loop(i, sz(res)) printf("%d %s\n", res[i].first, res[i].second.c_str());
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

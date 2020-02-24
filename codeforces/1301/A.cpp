@@ -24,48 +24,25 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAX = 1 << 20;
+char S[3][MAX];
 
-vector<ll> P;
 
+bool check(int p){
+	return S[2][p] == S[0][p] || S[2][p] == S[1][p];
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	int T; scanf("%d", &T);
+	while(T--){
+		loop(i, 3) scanf("%s", S[i]);
+		int n = strlen(S[0]);
+		bool y = 1;
+		loop(i, n) y &= check(i);
+		puts(y ? "YES" : "NO");
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

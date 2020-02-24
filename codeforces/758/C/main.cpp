@@ -26,52 +26,61 @@
 using namespace std;
 
 ll n,m,k,x,y;
-ll f = 0,t = 0,l = 0;
+ll q;
 
+ll F[101][101];
+
+void build(){
+	if(n == 1){
+		ll k = q/m;
+		q %= m;
+		for(int i = 1;i <= m;i++){
+			F[1][i] = k + (i <= q);
+		}
+		return;
+	}
+	ll q_r = (2*n - 2)*m;
+	k = q/q_r;
+	q %= q_r;
+	
+	vector<pi> V;
+	for(int i = 1;i <= n;i++)
+		for(int j = 1;j <= m;j++)
+			V.emplace_back(i, j);
+
+	for(int i = n-1;i > 1;i--)
+		for(int j = 1;j <= m;j++)
+			V.emplace_back(i, j);
+	
+	loop(i, q){
+		int x = V[i%sz(V)].first;
+		int y = V[i%sz(V)].second;
+		F[x][y]++;
+	}
+
+	for(int i = 1; i <= n; i++)
+		for(int j = 1;j <= m;j++){
+			int r = 2 - (i == 1 || i == n);
+			F[i][j] += r*k;
+		}
+	
+}
 
 int main(){
-	cin >> n >> m >> k >> x >> y;
-	if(n >= 4){
-		//2*m*q + (q + 1)*(n - 2)*m <= k
-		//q*(2*m + n*m - 2*m) + (n - 2)*m <= k
-		ll q = max((k - m*(n - 2))/(n*m),1LL);
-		if(k >= q*2*m+(q+1)*m*(n - 2)){
-			cerr << q << endl;
-			int pos = (q & 1) ? n : 1;
-			k -= q*(n - 2) - 2*q;
-			int r = k/m; k -= r*m;
-			ll f = q,t = q + 1 + (r || k),s = -1;
-			if(pos == 1) {
-				pos += r + (k > 0);
-				if(x <= pos){
-						if(x == 1) s = q;
-						else if(x < pos) s = q + 2;
-						else s = q + 1 + (y <= k);
-				}
-				else if(x == n) s = q;
-				else s = q + 1;
-			}
-			else {
-				pos -= r + (k > 0);
-				if(x >= pos){
-						if(x == n) s = q;
-						else if(x > pos) s = q + 2;
-						else s = q + 1 + (y <= k);
-				}
-				else if(x == 1) s = q;
-				else s = q + 1;
-			}
-			assert(s != -1);
-			cerr << t << " " << f << " " << s << endl;
-		}
-		else {
-			q = k/(n*m); int pos = 1;
-			assert(q <= 1);
-			if(q) pos = n;
-			k -= n*m;
-			
-			
-		}
-	}	
+	cin >> n >> m >> q >> x >> y;
+	
+	build();
+
+
+	ll mn = LLONG_MAX, mx = LLONG_MIN, sergi = F[x][y];
+	for(int i = 1;i <= n;i++)
+		for(int j = 1;j <= m;j++)
+			mn = min(mn, (ll)F[i][j]), mx = max(mx, (ll)F[i][j]);
+	
+
+	cout << mx << " " << mn << " " << sergi << endl;
+		
+	
+	
 	return 0;
 }

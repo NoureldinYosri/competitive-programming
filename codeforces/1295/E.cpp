@@ -24,48 +24,39 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAX = 200*1000 + 10;
 
-vector<ll> P;
+pi pref_max[MAX], suff_min[MAX];
+int P[MAX], A[MAX], n;
+int R[MAX];
 
+auto cmp = [](const int & a, const int & b){
+	return P[a] < P[b];
+};
+
+bool check(int a, int b){
+	if(a == n || b == n) return 1;
+	return cmp(a, b);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", P + i), P[i]--;
+	loop(i, n) scanf("%d", A + i);
+	loop(i, n) R[P[i]] = i;
+	
+		
+	for(int max_suff = n-1; max_suff >= 0; max_suff--){
+		int r = R[max_suff];
+		if(!r) continue;
+		
+		
+		
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
+
 	return 0;
 }

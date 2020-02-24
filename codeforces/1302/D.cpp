@@ -24,48 +24,49 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAX = 2*200*1000 + 10;
+const ll oo = 1LL << 60;
+ll dist[MAX];
+vi E[MAX];
+int fr[MAX], to[MAX], W[MAX];
+int n, m;
+bool vis[MAX];
+map<int, int> tmp[MAX];
 
-vector<ll> P;
-
+using edge = pair<ll, int>;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d %d", &n, &m);
+	loop(e, m){
+		scanf("%d %d %d", fr + e, to + e, W + e);
+		tmp[fr[e]][to[e]] = W[e];
+		tmp[to[e]][fr[e]] = W[e];
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	fill(dist, dist + n + 1, oo);
+	dist[1] = 0;
+	priority_queue<edge, vector<edge>, greater<edge>> pq;
+	pq.emplace(0, 1);
+	while(!pq.empty()){
+		int u = pq.top().second;
+		pq.pop();
+		if(vis[u]) continue;
+		vis[u] = 1;
+		
+		for(auto e : tmp[u]){
+			int v = e.first;
+			int w = dist[u] + e.second;
+			if(w <= dist[v]){
+				dist[v] = w;
+				pq.emplace(dist[v], v);
+			}
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+		
 	}
-	cout << ans << endl;
-	
-	
+	if(!vis[n]) dist[n] = -1;
+	printf("%lld\n", dist[n]);
 	return 0;
 }

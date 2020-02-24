@@ -24,48 +24,39 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
+int A[3];
+vi ord;
+
+int solve(){
+	int ret = 0;
+	int B[3];
+	ord.clear();
+	loop(i, 8) if(i) ord.pb(i);
+	do{
+		copy(A, A + 3, B);
+		int tmp = 0;
+		for(int m : ord){
+			int u = 1;
+			loop(i, 3) if(m & (1 << i)) u = min(u, B[i]);
+			tmp += u;
+			if(!u) break;
+			loop(i, 3) if(m & (1 << i)) B[i] -= u;		
+		}
+		ret = max(ret, tmp);
+	}while(next_permutation(all(ord)));
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	int T; scanf("%d\n", &T);
+	while(T--){
+		loop(i, 3) scanf("%d", A + i);
+		printf("%d\n", solve());
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

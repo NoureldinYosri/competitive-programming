@@ -24,48 +24,45 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
+char S[1 << 20];
+
+int freq[128];
+vi IDX[128];
+
+ll solve(vi & A, vi & B){
+	ll ret = 0;
+	for(int i : A){
+		auto ptr = upper_bound(all(B), i);
+		ret += B.end() - ptr;
+	}
+/*	if(ret){
+		print(A, int);
+		print(B, int);
+		cerr << ret << endl;
+			
+	}
+*/	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%s", S);
+	int n = strlen(S);
+	loop(i, n) {
+		freq[S[i] - 'a']++;
+		IDX[S[i] - 'a'].pb(i);
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
+	ll ans = 0;
+	loop(c, 26)
+		ans = max(ans, freq[c] + 0LL);
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	loop(i, 26) loop(j, 26) {
+		ans = max(ans, solve(IDX[i], IDX[j]));
 	}
 	cout << ans << endl;
-	
-	
 	return 0;
 }

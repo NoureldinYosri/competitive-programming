@@ -24,48 +24,74 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+char S[1 << 20];
+int n;
 
-vector<ll> P;
 
+
+vi aux;
+void build_small(){
+	set<int> M;
+	for(int i = 1;i <= n;i++) M.insert(i);
+	for(int i = 0;i < n-1;){
+		if(S[i] == '>'){
+			printf("%d ", *M.rbegin());
+			M.erase(*M.rbegin());
+			i++;
+			continue;
+		}
+		int j = i;
+		auto ptr = M.rbegin();
+		while(j+1 < n && S[j] == '<') {
+			ptr++;
+			j++;
+		}
+		aux.clear();
+		for(;i < j; i++){
+			printf("%d ", *ptr);
+			aux.pb(*ptr);
+			ptr--;
+		}
+		for(int x : aux) M.erase(x);
+	}
+	printf("%d\n", *M.begin());	
+}
+void build_big(){
+	set<int> M;
+	for(int i = 1;i <= n;i++) M.insert(i);
+	for(int i = 0;i < n-1;){
+		if(S[i] == '<'){
+			printf("%d ", *M.begin());
+			M.erase(M.begin());
+			i++;
+			continue;
+		}
+		int j = i;
+		auto ptr = M.begin();
+		while(j+1 < n && S[j] == '>') {
+			ptr++;
+			j++;
+		}
+		aux.clear();
+		for(;i < j; i++){
+			printf("%d ", *ptr);
+			aux.pb(*ptr);
+			ptr--;
+		}
+		for(int x : aux) M.erase(x);
+	}
+	printf("%d\n", *M.begin());
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %s", &n, S);
+		build_small();
+		build_big();
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

@@ -24,48 +24,39 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
+int n, x;
+int A[1 << 20];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %d",&n, &x);
+		loop(i, n) scanf("%d", A + i);
+		sort(A, A + n);
+		int ans = INT_MAX;
+		loop(i, n){
+			int h = A[i];
+			int tmp = x/h;
+			int r = x%h;
+			if(r){
+				assert(r <= A[n-1]);
+				tmp ++;
+				tmp += !binary_search(A, A + n, r);
+			}
+			ans = min(ans, tmp);
+			int x0 = x - x%h;
+			if(x0 >= h){
+				x0 -= h;
+				tmp = x0/h;
+				ans = min(ans, tmp + 2);
+			}
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+		printf("%d\n", ans);
 	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

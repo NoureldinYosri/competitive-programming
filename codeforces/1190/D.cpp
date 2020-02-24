@@ -24,48 +24,63 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAXN = 2*100*1000 + 10, MAXST = 1 << 20;
+pi P[MAXN];
+int n;
 
-vector<ll> P;
-
+int BIT[MAXN];
+void add(int p, int v){
+	for(;p;p ^= LSOne(p))
+		BIT[p] += v;
+}
+int get(int p){
+	int ret = 0;
+	for(;p < MAXN; p += LSOne(p))
+		ret += BIT[p];
+	return ret;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d",&n);
+	map<int, int> M;
+	loop(i, n) {
+		scanf("%d %d",&P[i].second, &P[i].first);
+		P[i].first *= -1;
+		M[P[i].second];
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
+	sort(P, P + n);
+	loop(i, n) P[i].first *= -1;
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	int m = 0;
+	for(auto & p : M) p.second = ++m;
+	loop(i, n) P[i].second = M[P[i].second];
+
+	vi Xs;
+	ll ans = 0;
+	set<int> S;
+	for(int i = 0;i < n;){
+		int y = P[i].first;
+		int j = i;
+		Xs.clear();
+		while(j < n && P[j].first == y) {
+			Xs.pb(P[j].second);
+			j++;
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+		for(int x : Xs) if(!S.count(x)) add(x, 1), S.insert(x);
+		int prv = 0;
+		for(int x : Xs){
+			ll left = get(prv+1) - get(x+1);
+			ll right = get(x);
+//			cout << x << " " << left << " " << right << endl;
+			ans += left * right;
+			prv = x;
+		}		
+		i = j;
 	}
+	
 	cout << ans << endl;
-	
-	
 	return 0;
 }

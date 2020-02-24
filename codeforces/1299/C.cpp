@@ -6,7 +6,7 @@
 #define mp make_pair
 #define sz(A) ((int)A.size())
 typedef std::vector<int> vi;
-typedef std::pair<int,int> pi;
+typedef std::pair<long long, long long> pi;
 typedef std::vector<pi> vp;
 typedef long long ll;
 #define popcnt(x) __builtin_popcount(x)
@@ -24,48 +24,58 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAXLG = 20;
+double A[1 << 20];
+int n, B[1 << 20];
+ll S[1 << 20];
+pi P[1 << 20];
+vi ord;
+bool active[1 << 20];
+int nxt[1 << 20];
 
-vector<ll> P;
 
+ll cross(pi a, pi b, pi c){
+	b.first -= a.first, b.second -= a.second;
+	c.first -= a.first, c.second -= a.second;
+	return b.first*(ll)c.second - b.second*(ll)c.first;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
+	scanf("%d",&n);
+	loop(i, n) scanf("%d", B + i + 1), S[i+1] = S[i] + B[i+1];
+	loop(i, n+1) P[i] = pi(i, S[i]), ord.pb(i);
+	sort(all(ord), [](const int & a, const int & b){
+		return P[a] > P[b];
+	});
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	vi H;
+	for(int i : ord){
+		while(sz(H) > 1 && cross(P[H[sz(H)-2]], P[H.back()], P[i]) >= 0) H.pop_back();
+		H.pb(i);
 	}
-	cout << ans << endl;
+	for(int i : H) {
+		active[i] = 1;
+		//cout << P[i] << endl;
+	}
 	
+	nxt[n+1] = n;
+	for(int i = n;i >= 1;i--){
+		if(active[i]) nxt[i] = i;
+		else nxt[i] = nxt[i+1];
+	}
+	
+	for(int i = 1;i <= n;){
+		int j = nxt[i];
+		double s = S[j] - S[i-1];
+		s /= j-i+1;
+		for(;i <= j;i++)
+			A[i] = s;
+	}
+	for(int i = 1;i <= n;i++)
+		printf("%.8f\n", A[i]);
 	
 	return 0;
 }

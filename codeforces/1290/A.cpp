@@ -24,48 +24,34 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAXN = 3500  + 10;
+int dp[MAXN][MAXN];
+int n, m, K;
+int A[MAXN];
 
-vector<ll> P;
-
+int solve(int s, int e){
+	if(s+n-e-1 == m-1) return max(A[s], A[e]);
+	int & ret = dp[s][e];
+	if(ret != -1) return ret;
+	return ret = min(solve(s+1, e), solve(s, e-1));
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	int T; scanf("%d",&T);
+	while(T--){
+		scanf("%d %d %d",&n, &m, &K);
+		K = min(K, m-1);
+		loop(i, n) scanf("%d",A + i);
+		fill(dp[0], dp[n], -1);
+		int ans = 0;
+		loop(r, K+1) {
+//			cout << r << " " << n-1-(K-r) << ". " << solve(r, n-1-(K-r)) << endl;
+			ans = max(ans, solve(r, n-1-(K-r)));
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+		printf("%d\n", ans);
 	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

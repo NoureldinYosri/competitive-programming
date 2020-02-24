@@ -24,48 +24,70 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
 
+
+int A[1 << 20], n;
+ll S;
+set<ll> ST;
+
+int solve(){
+	ll sum = 0;
+	loop(i, n) sum += A[i];
+	if(sum < S) return -1;
+	map<int, int> freq;
+	loop(i, n){
+		int x = A[i];
+		int b = 0;
+		while(x > 1){
+			b++;
+			x >>= 1;
+		}
+		freq[b]++;
+	}
+	
+//	for(auto p : freq) cerr << p ;
+//	cerr << endl;
+	
+	int ans = 0;
+	for(int b = 0; S; b++){
+		assert(freq.begin()->second);
+		ll v = 1LL << b;
+		if(freq.begin()->first == b){
+			if(S & v){
+				freq[b]--;
+				S ^= v;
+			}
+			int x = freq[b];
+			if(x > 1)
+				freq[b+1] += x >> 1;
+			freq.erase(freq.begin());
+		}
+		if(S & v){
+			int bt = freq.begin()->first;
+			freq[bt]--;
+			if(!freq[bt]) freq.erase(freq.begin());
+			bt--;
+			ans++;
+			S ^= v;
+			while(bt > b) freq[bt--]++, ans++;
+		}
+//		cerr << "@" << b << ": ";
+//		for(auto p : freq) cerr << p ;
+//		cerr << endl;
+	}
+	return ans;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%lld %d", &S, &n);
+		loop(i, n) scanf("%d", A+i);
+		printf("%d\n", solve());
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
-	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

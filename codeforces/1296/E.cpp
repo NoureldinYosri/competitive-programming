@@ -24,48 +24,68 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+const int MAX = 1 << 20;
 
-vector<ll> P;
 
+set<int> IDX[128];
+bool vis[MAX];
+vi ord;
+string s;
+int n;
+
+void dfs(int u){
+	if(vis[u]) return;
+	vis[u] = 1;
+	int c = s[u];
+	for(int z = 'z'; z > c; z--){
+		while(!IDX[z].empty() && *IDX[z].begin() < u){
+			int v = *IDX[z].begin();
+			IDX[z].erase(IDX[z].begin());
+			dfs(v);
+		}
+	}
+	ord.pb(u);
+}
+
+int color[MAX];
+set<int> S[26];
+int mix[26];
+
+
+bool found(int x, int z){
+	for(int c = z; c < 26; c++)
+		if(S[c].count(x))
+			return 1;
+	return 0;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	cin >> n >> s;
+	loop(i, n){
+		int c = s[i];
+		IDX[c].insert(i);
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	loop(i, n) if(!vis[i]) dfs(i);
+	
+	int k = 0;
+	loop(i, n){
+		int c = s[i] - 'a';
+		k = max(k, color[i] = mix[c]);
+		S[c].insert(color[i]);
+		
+		for(int z = 0;z <= c;z++){
+			while(found(mix[z], z+1)) mix[z]++;
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+//		prArr(mix, 26, int);
+						
 	}
-	cout << ans << endl;
-	
-	
+	k++;
+	printf("%d\n", k);
+	loop(i, n) printf("%d ", color[i] + 1);
+	puts("");
 	return 0;
 }

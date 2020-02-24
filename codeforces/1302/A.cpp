@@ -24,48 +24,52 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
-
-vector<ll> P;
+const int MAX = 1024;
+pi col[MAX], row[MAX];
+int m, n;
+int A[MAX][MAX];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
+	scanf("%d %d", &m, &n);
+	//if(m > n) 
+	swap(n, m);
+	loop(i, m) loop(j, n) scanf("%d", &A[i][j]);
+	loop(i, m) row[i] = pi(INT_MIN, INT_MIN);
+	loop(i, n) col[i] = pi(INT_MAX, INT_MAX);
 	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	loop(i, m) loop(j, n) {
+		int x = A[i][j];
+		if(x > row[i].second) {
+			row[i].second = x;
+			if(row[i].second > row[i].first) swap(row[i].first, row[i].second);
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
+		if(x < col[j].second){
+			col[j].second = x;
+			if(col[j].second < col[j].first) swap(col[j].first, col[j].second);
 		}
-		r = R;
 	}
-	cout << ans << endl;
+/*	loop(i, m) {
+		prArr(A[i], n, int);
+	}
+	loop(i, m) {
+		cerr << row[i] << endl;
+	}
+	*/
+	loop(i, m) loop(j, n){
+		int x = A[i][j];
+		bool y = 1;
+		y &= col[j].first == x && col[j].second != x;
+		y &= row[i].first == x && row[i].second != x;
+		if(y){
+			printf("%d %d\n", i + 1, j + 1);
+			return 0;
+		}
+	}
 	
-	
+	puts("0 0");
 	return 0;
 }

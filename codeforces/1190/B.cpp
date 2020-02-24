@@ -24,48 +24,52 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
-
+char out[][20] = {"cslnb", "sjfnb"};
+int A[1 << 20], n;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d",&n);
+	loop(i, n) scanf("%d",A + i);
+	sort(A, A+n);
+	int problems = 0;
+	int c = -1;
+	for(int i = 0;i < n;){
+		int j = i;
+		while(j < n && A[i] == A[j]) j++;
+		problems += j-i-1;
+		if(j-i-1) c = i;
+		i = j;
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	if(problems > 1){
+		puts(out[0]);
+		return 0;
 	}
-	cout << ans << endl;
-	
-	
+	int flag = 0,d = 0;
+	if(problems == 1){
+		if(A[c] == 0){
+			puts(out[0]);
+			return 0;
+		}
+		assert(c >= 0);
+		A[c]--;
+		if(c && A[c] == A[c-1]){
+			puts(out[0]);
+			return 0;
+		}
+		flag = 1;
+	}
+	loop(i, n){
+		if(A[i] < i){
+			d = 0;
+			break;
+		}
+		d ^= (A[i] - i) & 1;
+	}
+	d ^= flag;
+	puts(out[d]);
 	return 0;
 }

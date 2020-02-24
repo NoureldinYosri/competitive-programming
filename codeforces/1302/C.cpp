@@ -24,48 +24,44 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
+const int MAX = 1 << 20;
+ll BIT[MAX];
+int n;
+int A[MAX];
+
+void add(int p, int v){
+	for(;p < MAX; p += LSOne(p))
+		BIT[p] += v;
+}
+ll get(int p){
+	ll ret = 0;
+	for(;p; p ^= LSOne(p))
+		ret += BIT[p];
+	return ret;
+}
+
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	int T; scanf("%d", &T);
+	while(T--){
+		int m; scanf("%d %d", &n, &m);
+		while(m--){
+			int t ,a , b; scanf("%d %d %d", &t, &a, &b);
+			if(t == 1) {
+				add(a, b - A[a]);
+				A[a] = b;
+			}
+			else {
+				printf("%lld\n", get(b) - get(a - 1));
+			}
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+//		fill(BIT, BIT + n + 1, 0);
+//		fill(A, A + n + 1, 0);
 	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

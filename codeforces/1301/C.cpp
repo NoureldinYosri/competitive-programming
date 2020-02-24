@@ -24,48 +24,65 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
+ll C(ll n){
+	return (n*(n+1LL))/2;
+}
 
-vector<ll> P;
+ll solve(int n, int m){
+	if(m == 0) return 0;
+	if(n == m) return C(n);
+	int d = (n - m)/(m + 1);
+	ll ret = C(n);
+	int r = (n - m)%(m + 1);
+	ret -= C(d)*(m+1-r) + C(d+1) * r;
+	return ret;
+}
+
+
+int bf(int n, int m){
+	vi V(n, 0), ord;
+	loop(i, m) V[i] = 1;
+	loop(i, n) ord.pb(i);
+	int ret = 0;
+	do{
+		int tmp = 0;
+		int prv = -1;
+		loop(j, n){
+			int i = ord[j];
+			if(V[i]) prv = j;
+			tmp += prv + 1;
+		}
+		ret = max(ret, tmp);
+	}while(next_permutation(all(ord)));
+	return ret;
+}
+
+void test(){
+	int n = rand()%10 + 1;
+	int m = rand()%(n+1);
+	int correct = bf(n, m);
+	int ans = solve(n, m);
+	if(ans != correct){
+		cerr << "failed on " << n << " " << m << endl;
+		cerr << "expected " << correct << " found " << ans << endl;
+		exit(0);
+	}
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+/*	for(int t = 1;;t++){
+		test();
+		cerr << "passed " << t << endl;
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+*/
+	int T; scanf("%d", &T);
+	while(T--){
+		int n, m; scanf("%d %d", &n, &m);
+		printf("%lld\n", solve(n, m));
 	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

@@ -23,49 +23,43 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 	return st;
 }
 using namespace std;
+ 
+const int MAXN = 300*1000 + 10;
+char S[MAXN];
+int n, m;
+vi IDX[128];
+int F[MAXN][26];
 
-ll n,k;
-int m;
-
-vector<ll> P;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%s", S);
+	n = strlen(S);
+	loop(i, n){
+		loop(j, 26) F[i+1][j] = F[i][j];
+		F[i+1][S[i]-'a']++;
+		IDX[S[i] - 'a'].pb(i+1);
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
+	int f[26];
+	scanf("%d",&m);
+	while(m--){
+		int l, r; scanf("%d %d", &l, &r);
+		if(l==r) puts("YES");
+		else {
+			int cnt = 0;			
+			loop(j, 26) {
+				f[j] = F[r][j] - F[l-1][j];
+				cnt += f[j] > 0;
+			}
+			if(cnt == 1) puts("NO");
+			else if(cnt > 2) puts("YES");
+			else {
+				puts((S[l-1] != S[r-1]) ? "YES" : "NO");
+			}
 		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
 	}
-	cout << ans << endl;
-	
-	
 	return 0;
 }

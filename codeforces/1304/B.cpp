@@ -24,48 +24,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
-
-vector<ll> P;
+int n, m; 
+string S[100], R[100];
+char buffer[1 << 20];
+bool taken[100];
+vector<pair<string, string>> V;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d %d", &n, &m);
+	loop(i, n) {
+		scanf("%s", buffer);
+		S[i] = string(buffer);
+		reverse(buffer, buffer + m);
+		R[i] = string(buffer);
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	string center = "";
+	loop(i, n) if(!taken[i]){
+		bool done = 0;
+		for(int j = i+1;j < n;j++)
+			if(!taken[j] && S[i] == R[j]){
+				taken[i] = taken[j] = 1;
+				V.emplace_back(S[i], S[j]);
+				done = 1;
+				break;
+			}
+		if(!done && S[i] == R[i]) center = S[i];
 	}
-	cout << ans << endl;
-	
-	
+	int len = 2*m*sz(V) + sz(center);
+	printf("%d\n", len);
+	loop(i, sz(V)) printf("%s", V[i].first.c_str());
+	printf("%s", center.c_str());
+	reverse(all(V));
+	loop(i, sz(V)) printf("%s", V[i].second.c_str());
+	puts("");
 	return 0;
 }

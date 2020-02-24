@@ -23,49 +23,62 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 	return st;
 }
 using namespace std;
+ 
+const int MAX = 50000, B = MAX/3;
+bitset<MAX> adj[B + 1];
+int n, m;
+bool vis[MAX];
+vi G[MAX];
+int k;
+bitset<MAX> aux;
 
-ll n,k;
-int m;
-
-vector<ll> P;
 
 
+void dfs(int u){
+	if(aux.test(u)) return;
+	aux.set(u);
+	for(int v : G[u]) dfs(v);
+	
+}
+
+void floodfill(int u){
+	if(aux.test(u)) return;
+	if(u < k) {
+		aux |= adj[u];
+		return;
+	}
+	aux.set(u);
+	for(int v : G[u]) dfs(v);	
+}
+
+ 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
+	scanf("%d %d", &n, &m);
+	k = n / 3;
+	k = min(k, B);
+	while(m--){
+		int a, b; scanf("%d %d", &a, &b);
+		a--, b--;
+		swap(a, b);
+		if(a < k)
+			adj[a].set(b);
+		G[a].pb(b);
 	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	loop(i, k) {
+		dfs(i);
+		adj[i] = aux;
+		aux.reset();
+	}
+	ll ans = 0;
+	loop(i, n){
+		floodfill(i);
+		ll r = aux.count();
+		ans += r*r;
+		aux.reset();
 	}
 	cout << ans << endl;
-	
-	
 	return 0;
 }

@@ -24,48 +24,68 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-ll n,k;
-int m;
 
-vector<ll> P;
+const int MAX = 200*1000 + 10;
+int A[MAX], T[MAX], n;
+vi ord;
 
+map<int, int> L;
+int get(int x){
+	auto ptr = L.lower_bound(x);
+	if(ptr == L.end()) return x;
+	int l = ptr->second;
+	int r = ptr->first;
+	if(x < l) return x;
+	return r+1;
+}
+
+void insert(int x){
+	auto ptr = L.emplace(x, x).first;
+	auto nxt = ptr;
+	auto prv = ptr;
+	if(prv != L.begin()) prv--;
+	nxt++;
+	int l1 = prv->second;
+	int r1 = prv->first;
+	
+	
+	int l = x, r = x;
+	
+	if(r1+1 == x){
+		L.erase(prv);
+		l = l1;
+	}
+	
+	if(nxt != L.end() && nxt->second-1 == x){
+		r = nxt->first;
+		L.erase(nxt);
+	}
+	if(r != x) L.erase(x);
+	
+	L[r] = l;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%lld %d %lld",&n,&m,&k);
-	loop(i,m){
-		ll x; scanf("%lld",&x);
-		P.pb(x);
-	}
-	reverse(all(P));
-	int ans = 0, killed = 0;
-	ll r = 0;
-	
-	while(!P.empty()){
-		ans++;
-		ll R = r+killed;
-//		cerr << "guess " << R << " " << r <<  " " << killed << endl;
-		if(P.back() > R){
-			// q*k + R >= P.back()
-			// q >= (P.back() - R)/k
-			ll q = (P.back() - R + k - 1)/k;
-			if(q*k > n-R) R = n;
-			else R += q*k;
-			assert(P.back() <= R);
-		}
-//		cerr << "R = " << R << endl;
-		killed = 0;
-		while(!P.empty() && P.back() <= R){	
-//			cerr << "kill " << P.back() << endl;
-			P.pop_back();
-			killed++;
-		}
-		r = R;
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", A + i);
+	loop(i, n) scanf("%d", T + i);
+	loop(i, n) ord.pb(i);
+	sort(all(ord), [](const int & a, const int & b){
+		return T[a] > T[b];
+	});
+	ll ans = 0;
+	for(int i : ord){
+		int x = A[i];
+		auto ptr = L.lower_bound(x);
+		int y = get(x);
+//		cerr << i << ": " << x << " -> " << y << endl;
+		ans += (y-x+0LL)*T[i];
+		insert(y);
+//		for(auto p : L) cerr << p << endl;
 	}
 	cout << ans << endl;
-	
-	
 	return 0;
 }
