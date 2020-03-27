@@ -25,12 +25,35 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 2 << 10, MAXH = 2020;
+int A[MAXN], n;
+int dp[MAXN][MAXH];
+int H, L, R;
+
+int solve(int i, int h){
+	if(i == n) return 0;
+	int & ret = dp[i][h];
+	if(ret != -1) return ret;
+	
+	ret = 0;
+	loop(c, 2){
+		int s = (h + A[i] - c)%H;
+		int tmp = solve(i+1, s);
+		tmp += L <= s && s <= R;
+		ret = max(ret, tmp);
+	}
+	
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d %d %d %d", &n, &H, &L, &R);
+	loop(i, n) scanf("%d", A + i);
+	memset(dp, -1, sizeof dp);
+	cout << solve(0, 0) << endl;
 	return 0;
 }

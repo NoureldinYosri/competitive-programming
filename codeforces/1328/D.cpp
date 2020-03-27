@@ -24,13 +24,54 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int A[1 << 20];
+int n;
+int color[1 << 20];
 
+int solve(){
+	int x = A[0];
+	bool are_eq = 1;
+	loop(i, n) are_eq &= A[i] == x;
+	if(are_eq){
+		loop(i, n) color[i] = 1;
+		return 1;
+	}
+
+	int q = -1;
+	loop(i, n) if(A[i] == A[(i+1)%n]) {
+		q = i;
+		break;
+	}
+	if(q != -1 || n%2 == 0){
+		loop(i, n) color[i] = (i&1) + 1;
+//		prArr(color, n, int);
+		if(A[0] != A[n-1] && color[0] == color[n-1]){
+			loop(i, q+1) color[i] = (i + 1)%2 + 1;
+		}
+		
+		return 2;
+	}
+	
+	
+	loop(i, n) color[i] = i%3 + 1;
+	
+	if(A[0] != A[n-1] && color[0] == color[n-1]){
+		color[0] = 3;
+	}
+	return 3;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d", &n);
+		loop(i, n) scanf("%d", A + i);
+		printf("%d\n", solve());
+		loop(i, n) printf("%d%c", color[i], " \n"[i==n-1]);
+	}
 	return 0;
 }

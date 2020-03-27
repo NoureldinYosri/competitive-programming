@@ -24,6 +24,29 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAXN = 200*1000 + 10;
+vi G[MAXN];
+int A[MAXN], n;
+int ans[MAXN];
+
+int dfs(int u, int p){
+	for(int v : G[u]) if(v != p){
+		ans[u] += max(0, dfs(v, u));
+	}
+	ans[u] += A[u] ? 1 : -1;
+	return ans[u];
+}
+
+
+void dfs(int u, int p, int fp){
+	fp = max(fp, 0);
+	ans[u] += fp;
+	for(int v : G[u]) if(v != p) {
+		int tmp = ans[u];
+		if(ans[v] > 0) tmp -= ans[v];
+		dfs(v, u, tmp);
+	}
+}
 
 
 
@@ -31,6 +54,15 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d", &n);
+	for(int i = 1;i <= n;i++) scanf("%d", A + i);
+	loop(e, n-1){
+		int a, b; scanf("%d %d", &a, &b);
+		G[a].pb(b);
+		G[b].pb(a);
+	}
+	dfs(1, 0);
+	dfs(1, 0, 0);
+	for(int i = 1;i <= n;i++) printf("%d%c", ans[i], " \n"[i==n]);	
 	return 0;
 }

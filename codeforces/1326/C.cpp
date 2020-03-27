@@ -25,12 +25,43 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int mod = 998244353;
+int add(int a, int b){
+	a += b;
+	if(a >= mod) a -= mod;
+	if(a < 0) a += mod;
+	return a;
+}
+int mul(int a, int b){
+	return (a*(ll)b)%mod;
+}
 
+int n, K;
+int P[1 << 20];
+int R[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d", &n, &K);
+	loop(i, n) scanf("%d", P + i);
+	loop(i, n) R[P[i]] = i;
+
+	vi V;
+	ll ans = 0;
+	loop(k, K){
+		ans += n - k;
+		V.pb(R[n-k]);
+	}
+	ll cnt = 1;
+	sort(all(V));
+	for(int i = 0; i+1 < sz(V); i++){
+		int len = V[i+1] - V[i] - 1;
+		cnt = mul(cnt, len + 1);
+	}
+	cout << ans << " " << cnt << endl;
+	
 	
 	return 0;
 }

@@ -24,13 +24,38 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
+int n;
+char S[1 << 20];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %s", &n, S);
+	int ans = 0;
+	map<char, int> f;
+	f['('] = 1;
+	f[')'] = -1;
+	
+	loop(i, n){
+		int s = f[S[i]];
+		int j = i;
+		bool wrong = s < 0;
+		while(j+1 < n && s) {
+			s += f[S[++j]];
+			wrong |= s < 0;
+		}
+		if(s) {
+			puts("-1");
+			return 0;
+		}
+		ans += (j - i + 1)*wrong;
+		i = j;
+	}
+
+
+	cout << ans << endl;
 	
 	return 0;
 }

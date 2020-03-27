@@ -24,13 +24,49 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 200*1000 + 10;
+vi G[MAX];
+int dfs_in[MAX], dfs_out[MAX], dfs_time;
+int P[MAX];
 
+void dfs(int u, int p){
+	P[u] = p;
+	dfs_in[u] = dfs_time++;
+	for(int v : G[u]) if(v != p) dfs(v, u);
+	dfs_out[u] = dfs_time;
+}
+
+
+vi Q;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int n, m; scanf("%d %d", &n, &m);
+	loop(e, n-1){
+		int a, b; scanf("%d %d", &a, &b);
+		G[a].pb(b);
+		G[b].pb(a);
+	}
+	dfs(1, 0);
+	while(m--){
+		Q.clear();
+		int k; scanf("%d", &k);
+		while(k--){
+			int x; scanf("%d", &x);
+			Q.pb((x == 1) ? 1 : P[x]);
+		}
+		sort(all(Q), [](const int & a, const int & b){
+			return dfs_in[a] < dfs_in[b];
+		});
+		bool y = 1;
+		for(int i = 1; i < sz(Q) && y;i++){
+			int p = Q[i-1], u = Q[i];
+			y = dfs_in[p] <= dfs_in[u] && dfs_in[u] < dfs_out[p];
+		}
+		puts(y ? "YES" : "NO");
+	}
 	return 0;
 }

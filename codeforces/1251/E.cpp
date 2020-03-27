@@ -24,13 +24,63 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
-
+const int MAXN = 200*1000 + 10;
+vector<ll> prices[MAXN];
+int cnt[MAXN], n;
+ll dp[MAXN];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d", &n);
+		for(int i = 0;i <= n;i++) prices[i].clear(), cnt[i] = 0;
+		
+		loop(i, n){
+			int m, p; scanf("%d %d", &m, &p);
+			prices[m].pb(p);
+			cnt[m]++;
+		}
+		
+		for(int i = 1;i <= n;i++)
+			cnt[i] += cnt[i-1];
+		
+
+		
+
+		
+		
+		ll ans = 0;
+		for(int c = 0; c < n;){
+			while(c < cnt[c]) c = cnt[c];
+			assert(c == cnt[c]);
+			if(c == n) break;
+			
+			
+			int nxt = c + 1;
+			while(prices[nxt].empty()) nxt ++;
+			
+			int need = nxt - c;
+			int to = need;
+			while(to < cnt[to]) to = cnt[to];
+			multiset<ll> MS;
+			for(int i = c+1; i <= to; i++)
+				for(ll x : prices[i])
+					MS.insert(x);
+			assert(sz(MS) <= need);
+			cerr << "need " << need << " to go from " << c << " to " << nxt << " from: " << endl;
+			print(MS, ll);
+/*			while(need --){
+				ans += *MS.begin();
+				MS.erase(MS.begin());
+			}
+*/			c = nxt;
+		}
+
+		printf("%lld\n", ans);
+		break;
+	}
 	return 0;
 }

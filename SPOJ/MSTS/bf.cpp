@@ -25,12 +25,62 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+vector<pair<int, pi> > E;
+int n, m;
 
+int id[111], W[111];
+int find(int a){
+	return id[a] = (a == id[a]) ? a : find(id[a]);
+}
+int join(int a, int b){
+	a = find(a), b = find(b);
+	if(a == b) return 0;
+	if(W[a] < W[b]) swap(a, b);
+	W[a] += W[b];
+	id[b] = a;
+	return 1;
+}
+
+void init(){
+	for(int i = 1; i <= n;i++) id[i] = i, W[i] = 1;	
+}
+
+bool valid(int msk, int target){
+	int cost = 0;
+	init();
+	loop(e, m) if((msk >> e) & 1){
+		int a = E[e].second.first, b = E[e].second.second;
+		if(join(a, b)) cost += E[e].first;
+		else return 0;
+	}
+	assert(cost >= target);
+	return cost == target;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	cin >> n >> m;
+	loop(e, m){
+		int a, b, c;
+		scanf("%d %d %d", &a, &b, &c);
+		E.emplace_back(c, pi(a, b));
+	}
+	sort(all(E));
+	init();
+	int cost = 0;
+	for(auto e : E){
+		int a = e.second.first, b = e.second.second;
+		cost += e.first * join(a, b);
+	}
+	int ans = 0;
+	for(int msk = 1; msk < (1 << m); msk++){
+		if(popcnt(msk) != n-1) continue;
+		ans += valid(msk, cost);
+	}
 	
+	assert(ans);
+	cout << ans << endl;
 	return 0;
 }

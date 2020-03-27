@@ -25,12 +25,54 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 200*1000 + 10;
+int deg[MAXN], P[MAXN];
+vi G[MAXN];
+bool vis[MAXN];
+int n, m;
+
+void dfs(int u, int p){
+	P[u] = p;
+	deg[p]++;
+	vis[u] = 1;
+	for(int v : G[u]) if(!vis[v]) dfs(v, u);
+}
+
+
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int D; scanf("%d %d %d", &n, &m, &D);
+	loop(e, m){
+		int a, b; scanf("%d %d", &a, &b);
+		G[a].pb(b);
+		G[b].pb(a);
+	}
+	if(sz(G[1]) < D){
+		puts("NO");
+		return 0;
+	}
+	dfs(1, 0);
+	if(deg[1] > D){
+		puts("NO");
+		return 0;		
+	}
+	int r = D - deg[1];
+	for(int v : G[1]){
+		if(!r) break;
+		if(P[v] == 1) continue;
+		P[v] = 1;
+		r--;
+	}
+	if(r){
+		puts("NO");
+		return 0;				
+	}
+	puts("YES");
+	for(int i = 2; i <= n;i++)
+		printf("%d %d\n", i, P[i]);
 	return 0;
 }

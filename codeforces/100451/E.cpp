@@ -24,6 +24,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 1 << 20;
+const string alphabet = "ACGT";
+vector<pi> ans;
+ll tot;
+int trie[MAX][4], siz;
+int E[MAX];
+char buffer[MAX];
+
+void insert(int id){
+	int cur = 0;
+	for(char *p = buffer; *p; p++){
+		int c = find(all(alphabet), *p) - alphabet.begin();
+		if(!trie[cur][c]) trie[cur][c] = ++siz;
+		cur = trie[cur][c];
+	}
+	if(E[cur]){
+		ans.emplace_back(id, E[cur]);
+		tot += strlen(buffer);
+		E[cur] = 0;
+	}
+	else E[cur] = id;
+}
+
+int dfs(int cur, int d){
+	int v = E[cur];
+	loop(c, 4) if(trie[cur][c]) {
+		int t = dfs(trie[cur][c], d+1);
+		if(t && v){
+			ans.emplace_back(t, v);
+			tot += d;
+			v = 0;
+		}
+		else if(!v) v = t;
+	}
+	return v;
+}
 
 
 
@@ -31,6 +67,13 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int n; scanf("%d", &n);
+	loop(i, n){
+		scanf("%s", buffer);
+		insert(i+1);
+	}
+	dfs(0, 0);
+	printf("%lld\n", tot);
+	for(auto [a, b] : ans) printf("%d %d\n", a, b);
 	return 0;
 }

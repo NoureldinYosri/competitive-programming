@@ -24,13 +24,59 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int A[1 << 20], n;
+int B[1 << 20], m;
+int P;
+int cand[2 << 20];
 
+int add(int a, int b){
+	a += b;
+	if(a >= P) a -= P;
+	return a;
+}
+int mul(int a, int b){
+	return (a*(ll)b)%P;
+}
 
+bool done[2 << 20];
+
+bool check(int k){
+	done[k] = 1;
+	int v = 0;
+	for(int x = max(k-(m-1), 0), L = min(k, n-1); x <= L; x++) {
+		int y = k - x;
+		if(y < m) v = add(v, mul(A[x], B[y]));
+	}
+	return v;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d %d", &n, &m, &P);
+	loop(i, n) {
+		scanf("%d", A + i);
+		A[i] %= P;
+	}
+	loop(i, m) {
+		scanf("%d", B + i);
+		B[i] %= P;
+	}
+	
+	while(n && !A[n-1]) n--;
+	while(m && !B[m-1]) m--;
+	
+
+
+	
+	for(int k = n+m-1; ; k--){
+		if(check(k)){
+			printf("%d\n", k);
+			return 0;
+		}
+	}
+	
 	
 	return 0;
 }

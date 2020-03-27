@@ -25,12 +25,45 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+int n;
+pi AB[1 << 20];
+ll f[1 << 20];
+int got[1 << 20];
+int color[1 << 20];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d", &n);
+	loop(i, n) {
+		scanf("%d", &AB[i].first);
+		AB[i].second = i;
+	}
+	sort(AB, AB + n);
+	ll ans = 0, best = 0;
+	f[0] = f[1] = 1LL << 60;
+	int nxt = -1;
+	for(int i = 2; i < n;i ++){
+		ll tmp = (i >= 3 ? f[i-3] : 0) - AB[i-2].first;
+		if(tmp < best){
+			best = tmp;
+			nxt = i-3;
+		}
+		ans = f[i] = AB[i].first + best;
+		got[i] = nxt;
+	}
+	int cur = n-1, k = 0;
+	while(cur > -1){
+		k++;
+		nxt = got[cur];
+		while(cur > nxt){
+			color[AB[cur].second] = k;
+			cur--;
+		}
+	}
+	cout << ans << " " << k << endl;
+	loop(i, n) printf("%d%c", color[i], " \n"[i==n-1]);
 	return 0;
 }

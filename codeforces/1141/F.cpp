@@ -25,12 +25,36 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+map<int, vector<pi>> M;
+int n;
+int A[2000];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", A + i);
+	for(int j = 0;j < n; j++){
+		for(int i = j, s = 0; i >= 0; i--){
+			s += A[i];
+			M[s].emplace_back(j, i);
+		}
+	}
+	vector<pi> ans, aux;
+	for(auto & [_, V] : M){
+		aux.clear();
+		
+		int E = -1;
+		for(auto [e, s] : V){
+			if(s <= E) continue;
+			E = e;
+			aux.emplace_back(s, e);
+		}
+		if(sz(aux) > sz(ans)) ans = aux;
+	}
+	printf("%d\n", sz(ans));
+	for(auto [s, e] : ans) 
+		printf("%d %d\n", s+1, e+1);
 	return 0;
 }

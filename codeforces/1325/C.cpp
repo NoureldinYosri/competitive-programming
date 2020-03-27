@@ -25,12 +25,39 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+vi E[1 << 20];
+int n;
+int deg[1 << 20];
+int fr[1 << 20], to[1 << 20], W[1 << 20];
+queue<int> q;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d", &n);
+	loop(e, n-1){
+		scanf("%d %d", fr + e, to + e);
+		E[fr[e]].pb(e);
+		E[to[e]].pb(e);
+	}
+	for(int u = 1;u <= n;u++){
+		deg[u] = sz(E[u]);
+		if(deg[u] == 1)	q.push(u);
+	}
 	
+	memset(W, -1, sizeof W);
+	
+	for(int i = 0; !q.empty(); q.pop(), i++){
+		int u = q.front();
+		for(int e : E[u]) if(W[e] == -1) {
+			W[e] = i;
+			int v = fr[e] + to[e] - u;
+			deg[v]--;
+			if(deg[v] == 1) q.push(v);
+		}
+	}
+	loop(e, n-1) printf("%d\n", W[e]);
+
 	return 0;
 }

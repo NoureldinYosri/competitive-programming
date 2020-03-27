@@ -24,13 +24,27 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int X[1 << 20], V[1 << 20];
 
+int get_min(int i, int j){
+	pi r1(X[i], V[i]);
+	pi r2(X[j], V[j]);
+	if(X[i] == X[j]) return 0;
+	if(r1 > r2) swap(r1, r2);
+	if(r1.second - r2.second > 0) return 0;
+	return r2.first - r1.first;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int n; scanf("%d", &n);
+	loop(i, n) scanf("%d", X + i);
+	loop(i, n) scanf("%d", V + i);
+	int ans = 0;
+	loop(j, n) loop(i, j) ans += get_min(i, j);
+	cout << ans << endl;
 	return 0;
 }

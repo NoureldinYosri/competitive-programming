@@ -24,13 +24,59 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
-
+const int MAX = 5000;
+map<ll, int> M;
+unordered_set<ll> S;
+ll A[MAX];
+int n, m;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	cin >> n >> m;
+	if(n < 3) {
+		if(m == 0) puts((n == 1) ? "1" : "1 2");
+		else puts("-1");
+		return 0;
+	}
+	A[0] = 1;
+	A[1] = 2;
+	ll low = 3;
+	M[3] = 1;
+	int mode = 0;
+	for(int i = 2;i < n; i++){
+		while(!M.empty() && M.begin()->first < low) M.erase(M.begin());
+		if(m) {
+			while(!M.empty() && M.begin()->second > m) M.erase(M.begin());
+			if(M.empty()) {
+				puts("-1");
+				return 0;
+			}
+			A[i] = M.begin()->first;
+			m -= M.begin()->second;
+		}
+		else {
+			for(auto p : M) {
+				S.insert(p.first);
+			}
+			M.clear();
+			mode = 1;
+			while(S.find(low) != S.end()) low++;
+			A[i] = low;
+		}
+		low = A[i] + 1;
+		loop(j, i) {
+			ll s = A[i] + A[j];
+			if(s < low) continue;
+			if(mode) S.insert(s);
+			else M[s]++;			
+		}
+	}
+	if(m){
+		puts("-1");
+		return 0;
+	}
+	loop(i, n) printf("%lld%c", A[i], " \n"[i==n-1]);
 	return 0;
 }

@@ -23,7 +23,7 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 #define tc() int T; scanf("%d",&T); for(int t = 1;t <= T;t++)
 using namespace std;
-
+ 
 const int MAX = 10*1000 + 10,B = 58;
 struct point{
 	double x,y;
@@ -51,20 +51,20 @@ double X[MAX],Y[MAX];
 point P[MAX];
 int n;
 point in;
-
+ 
 #define conj(p) point(p.x,-p.y)
 #define norm(p) ((p)*conj(p)).real()
 #define cross(p,q) (conj(p)*(q)).imag()
 #define dot(A,B) ((A)*conj(B)).real()
 #define same(x,y) (abs((x)-(y)) < EPS)
 #define leq(x,y) (((x) < (y)) || same(x,y))
-
-
-
+ 
+ 
+ 
 double memLen[MAX];
-
-
-
+ 
+ 
+ 
 bool PointInPoly(point p) {
 //	cout << "is " << p << " in poly" << endl;
 	loop(i,n){
@@ -76,7 +76,7 @@ bool PointInPoly(point p) {
 	}
 	return 1;
 }
-
+ 
 double f(double x,double y) {
 	point p(x,y);
 //	cout << p << endl;
@@ -91,21 +91,9 @@ double f(double x,double y) {
 //	cout << p << " " << R << endl;
 	return R;
 }
-
-const double phi = (1 + sqrt(5))/2.0;
-double search(double a,double b,function<double(double)> f) {
-	double c = b-(b-a)/phi;
-	double d = a+(b-a)/phi;
-	for(int t = 0; abs(c-d) > EPS && t < B;t++){
-		if(f(c) > f(d)) b = d;
-		else a = c;
-		c = b-(b-a)/phi;
-		d = a+(b-a)/phi;
-	}
-	return f((a+b)/2.0);
-}
-
-double f(const double & x) {
+ 
+ 
+double f(double x) {
 	double s = 1e9,e = -1e9;
 	loop(i,n){
 		int j = i + 1;
@@ -127,14 +115,17 @@ double f(const double & x) {
 			}
 		}
 	}
-	auto g = [x](const double & y){
-		return f(x,y);
-	};
-	return search(s,e,g);
+	for(int t = 0;t < B && s + EPS < e;t++) {
+		double m1 = s + (e-s)/3.0;
+		double m2 = m1 + (e-s)/3.0;
+		if(f(x,m1) < f(x,m2)) s = m1;
+		else e = m2;
+	}
+	return max(f(x,s),f(x,e));
 }
 
 
-
+ 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
@@ -155,18 +146,50 @@ int main(){
 		return cross(A,B) < 0;
 	});
 //	loop(i,n) cout << P[i].real() << " " << P[i].imag() << endl;
-
-
+ 
+ 
 	loop(i,n){
 		int j = (i + 1)%n;
 		point p = P[j] - P[i];
 		memLen[i] = sqrt(norm(p));
 	}
 	P[n] = P[0];
+ 
 	double s = 1e9,e = -1e9;
 	loop(i,n) s = min(s,X[i]),e = max(e,X[i]);
-	printf("%.3f\n",search(s,e,[](const double & x) {
-		return f(x);
-	}));
+
+
+	const double invphi = (sqrt(5) - 1) / 2 ;
+	const double invphi2 = (3 - sqrt(5)) / 2;
+
+    double h = e - s;
+    double a = s, b = e;
+    int m = int(ceil(log(1e-6 / h) / log(invphi)));
+
+	double  c = a + invphi2 * h;
+	double d = a + invphi * h;
+    double yc = f(c);
+    double yd = f(d);
+
+    for(int k = 0;k < m-1; k++){
+        if (yc > yd){
+            b = d;
+            d = c;
+            yd = yc;
+            h = invphi * h;
+            c = a + invphi2 * h;
+            yc = f(c);
+        }
+        else{
+            a = c;
+            c = d;
+            yc = yd;
+            h = invphi * h;
+            d = a + invphi * h;
+            yd = f(d);
+        }
+    }
+
+	printf("%.3f\n",f(a));
 	return 0;
 }

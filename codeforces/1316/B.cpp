@@ -24,13 +24,30 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+char txt[1 << 20];
+char S[1 << 20];
+int n;
 
-
+pair<string, int> ans;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %s", &n, txt);
+		ans = mp(string(txt), 1);
+		for(int k = 2;k <= n; k++){
+			int m = 0;
+			for(int i = k-1; i < n; i++)
+				S[m++] = txt[i];
+			copy(txt, txt + k-1, S + m);
+			if(m&1) reverse(S + m, S + n); 		
+			S[n] = 0;
+			ans = min(ans, mp(string(S), k));
+		}
+		printf("%s\n%d\n", ans.first.c_str(), ans.second);
+	}
 	return 0;
 }

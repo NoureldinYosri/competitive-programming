@@ -25,12 +25,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+ll A[1 << 20];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	ll n, k; cin >> n >> k;
+	
+	if(n < k*(k+1)/2) {
+		cout << "NO" << endl;
+		return 0;
+	}
+	ll low = 1, high = n;
+	loop(i, k){
+		ll r = k - i;
+		//w * r + r*(r-1)/2 <= n
+		ll n0 = (r*(r-1)/2);
+		ll w = (n - n0)/r;
+		w = max(w, low);
+		w = min(w, high);
+		n -= w;
+		if(n < 0){
+			puts("NO");
+			return 0;
+		}
+		A[i] = w;
+		low = w+1;
+		high = 2*w;		
+	}
+	if(n){
+		puts("NO");
+		return 0;
+	}
+	puts("YES");
+	loop(i, k)printf("%lld%c", A[i], " \n"[i==k-1]);
 	
 	return 0;
 }

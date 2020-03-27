@@ -25,12 +25,63 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+int mul(int a, int b, int m){
+	return (a*(ll)b)%m;
+}
+int powmod(int a, int p, int m){
+	if(!p) return 1;
+	int b = 1;
+	for(;p > 1; p>>=1){
+		if(p&1) b = mul(a, b, m);
+		a = mul(a, a, m);
+	}
+	return mul(a, b, m);
+}
+int inv(int x, int m){
+	return powmod(x, m - 2, m);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	ll n;
+	int p, r; cin >> n >> p >> r;
+	if(n >= 2*p){
+		if(r == 0) printf("%d %d\n", 2*p, 2*p-1);
+		else puts("-1 -1");
+	}
+	else if(n >= p){
+		if(r == 0){
+			for(int i = 2;i <= n;i ++)
+				if(i != p){
+					printf("%d %d\n", i, i-1);
+					return 0;
+				}
+			puts("-1 -1");
+		}
+		else {
+			int k = 1;
+			for(int i = 1;i <= n;i ++)
+				if(i != p)
+					k = mul(k, i, p);
+			printf("%d %d\n", p, mul(r, inv(k, p), p));
+		}
+	}
+	else if(r == 0) puts("-1 -1");
+	else {
+		int f = 1;
+		for(int i = 1;i <= n;i++)
+			f = mul(f, i, p);
+		int invf = inv(f, p);
+		for(int i = 2;i <= n;i++){
+			int j = mul(r, mul(i, invf, p), p);
+			if(j < i){
+				printf("%d %d\n", i, j);
+				return 0;
+			}
+		}
+		puts("-1 -1");
+	}
 	return 0;
 }

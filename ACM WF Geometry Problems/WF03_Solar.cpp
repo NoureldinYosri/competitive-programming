@@ -89,13 +89,11 @@ pair<double, double> solve(double a1, double b1, double a2, double b2, double t1
 
 double repr(double x){
 	static char S[100];
-/*	sprintf(S, "%.3f", abs(x));
+	sprintf(S, "%.3f", abs(x));
 	double y;
 	sscanf(S, "%lf", &y);
 	if(y > 0) return x;
 	return 0;
-*/
-	return x;
 }
 
 int main(int argc,char **argv){

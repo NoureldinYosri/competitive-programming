@@ -26,53 +26,41 @@ using namespace std;
 
 int A[1 << 20];
 int n,x;
-int B[1 << 20];
+int bad[1 << 20];
+int R[1 << 20];
 
-void getB(){
-	set<int> S;
-	for(int i = 1;i <= x;i++)
-		B[i] = x+1;
-	loop(i,n) {
-		int y = A[i];
-		auto ptr = S.upper_bound(y);
-		if(ptr != S.end())
-			B[y] = min(B[y],*ptr);
-		S.insert(y);
-	}
-}
-bool valid(int l,int r) {
-	int prv = 0;
-	loop(i,n) {
-		if(l <= A[i] && A[i] <= r) continue;
-		if(A[i] < prv) return 0;
-		prv = A[i];
-	}
-	return 1;
-}
+
 
 int main(int argc,char **argv){
 #ifdef HOME
 	freopen("in.in","r",stdin);
 #endif
-	scanf("%d %d",&n,&x);
+	int MAX; scanf("%d %d",&n,&MAX);
 	loop(i,n) scanf("%d",A + i);
+	int mx = -1;
+	loop(i, n){
+		bad[A[i]] = mx;
+		mx = max(mx, A[i]);
+	}
+	
+	R[MAX+1] = MAX;
+	for(int i = MAX; i; i--){
+		if(bad[i] > i) R[i] = R[i+1];
+		else if(R[i+1] == i) R[i] = i-1;
+		else R[i] = R[i+1];
+	}
 
-	getB();
-	ll ans = 0;
-	for(int l = 1;l <= x;l++){
-		if(!valid(l,x)) {
-			cerr << l << ": None " << B[l] << endl;
-			break;
-		}
-		int s = l,e = x;
-		while(s < e) {
-			int m = (s + e) >> 1;
-			if(valid(l,m)) e = m;
-			else s = m+1;
-		}
-		cerr << l << " " << s << " " << B[l] << endl;
-		ans += x-s+1;
+	ll ans = MAX+1-R[1];
+	mx = -1;
+	for(int l = 1; l <= MAX; l++){
+		mx = max(mx, bad[l]);
+		if(bad[l] > l) MAX = min(MAX, bad[l]);
+		int r = max(mx, l) + 1;
+		cerr << l << " " << mx << " " << r << " " << R[r] << endl;
+		ans += MAX-R[r]+1;
+		cerr << l << " " << R[r] << " " << MAX+1-R[r] << endl;
 	}
 	cout << ans << endl;
+	
 	return 0;
 }

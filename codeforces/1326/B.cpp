@@ -26,11 +26,23 @@ using namespace std;
 
 
 
+const int MAXN = 200*1000 + 10;
+
+ll B[1 << 20], A[1 << 20];
+int n;
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d", &n);
+	ll mx = 0;
+	loop(i, n){
+		scanf("%lld", B + i);
+		A[i] = B[i] + mx;
+		mx = max(mx, A[i]);
+		printf("%lld%c", A[i], " \n"[i==n-1]);
+	}
 	
 	return 0;
 }

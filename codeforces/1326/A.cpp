@@ -25,12 +25,67 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 100*1000 + 10;
+
+
+bool check(ll n){
+	ll m = n;
+	while(m){
+		if(m%10 == 0) return 0;
+		int d = m%10;
+		if(n%d == 0) return 0;
+		m /= 10;
+	}
+	return 1;
+}
+
+bool check(const string & s){
+	set<char> D{all(s)};
+	if(D.count('0')) return 0;
+	if(D.count('1')) return 0;
+	for(char cd : D){
+		int d = cd - '0';
+		int r = 0;
+		for(char c : s)
+			r = (r*10 + c - '0')%d;
+		if(r == 0) return 0;
+	}
+	return 1;
+}
+
+void increase(string & s){
+	for(int i = sz(s) - 1;i >= 0;i--){
+		if(s[i] == '9'){
+			s[i] = '0';
+			continue;
+		}
+		s[i]++;
+		return;
+	}
+	s = "1" + string(sz(s), '0');
+}
+
+
+
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	int T; scanf("%d", &T);
+	string s;
+	while(T--){
+		int n; scanf("%d", &n);
+		if(n == 1) puts("-1");
+		else {
+			s.clear();
+			loop(i, n-1) s.push_back('2');
+			s.push_back('3');
+			while(!check(s)) increase(s);
+			printf("%s\n", s.c_str());
+		}
+	}
 	
 	return 0;
 }

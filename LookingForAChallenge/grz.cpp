@@ -25,12 +25,24 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+int n, T;
+int A[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d %d", &n, &T);
+	loop(i, n) scanf("%d", A + i);
+	ll sum = 0, ans = 0;
+	loop(i, n){
+		int rem = T - i + 1;
+		if(rem <= 0) break;
+		ll ca = (rem + 1)/2, cb = rem - ca;
+		ll tmp = sum + ca * A[i] + cb* A[i+1];
+		ans = max(ans, tmp);
+		sum += A[i];
+	}
+	cout << ans << endl;
 	return 0;
 }

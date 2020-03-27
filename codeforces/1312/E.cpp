@@ -24,13 +24,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAXN = 555;
+int A[MAXN], n;
+pair<int, pi> dp[MAXN][MAXN];
+bool vis[MAXN][MAXN];
 
+pair<int, pi> solve(int s, int e){
+	if(s > e) return mp(0, pi(INT_MAX, INT_MAX));
+	if(s == e) return mp(1, pi(A[s], A[s]));
+	auto & ret = dp[s][e];
+	if(vis[s][e]) return ret;
+	vis[s][e] = 1;
+	ret = mp(e-s+1, pi(A[s], A[e]));
+	for(int k = s;k+1 <= e; k++){
+		auto L = solve(s, k), R = solve(k+1, e);
+		pair<int, pi> tmp;
+		tmp.first = L.first + R.first;
+		if(L.second.second == R.second.first){
+			tmp.first--;
+			if(L.first == 1) L.second.first++;
+			if(R.first == 1) R.second.second++;
+		}
+		tmp.second.first = L.second.first;
+		tmp.second.second = R.second.second;
+		ret = min(ret, tmp);
+	}
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", A + i);
+	printf("%d\n", solve(0, n-1).first);
 	return 0;
 }

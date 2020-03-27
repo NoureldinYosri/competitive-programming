@@ -24,13 +24,70 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 5 << 10;
+int P[MAX];
+int n, d;
+int depth[MAX];
+int child_cnt[MAX];
+vi cand[MAX];
+vi leafs;
 
+bool solve(){
+	depth[1] = 0;
+	for(int i = 2;i <= n; i++){
+		P[i] = i-1;
+		depth[i] = i-1;
+	}
+	for(int i = 1;i <= n;i++){
+		child_cnt[i] = i < n;
+	}
+	for(int i = 1; i <= n; i++) if(child_cnt[i] < 2) cand[depth[i]].pb(i);
+	leafs.pb(n);
+	
+	int s = (n*(n-1))/2;
 
+	while(d < s){
+		while(!leafs.empty()){
+			int d = depth[leafs.back()];
+			if(d >= 2 && !cand[d-2].empty()) break;
+			leafs.pop_back();
+		}
+		
+		if(leafs.empty()) break;
+	
+		int v = leafs.back();
+		int h = depth[v];
+		
+		depth[v]--;
+		s--;
+		
+		int p = P[v];
+		child_cnt[p]--;
+		if(!child_cnt[p]) leafs.pb(p);
+		
+		p = cand[h-2].back(); 
+		
+		P[v] = p;
+		child_cnt[p]++;
+		if(child_cnt[p] == 2)
+			cand[h-2].pop_back();
+	}
+	return d == s;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %d", &n, &d);
+		if(solve()){
+			puts("YES");
+			for(int i = 2;i <= n;i++)
+				printf("%d%c", P[i], " \n"[i==n]);
+		}
+		else puts("NO");
+	}
 	return 0;
 }

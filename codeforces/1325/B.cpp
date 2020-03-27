@@ -24,13 +24,20 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
+int A[1 << 20], n;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d", &n);
+		loop(i, n) scanf("%d", A + i);
+		sort(A, A + n);
+		n = unique(A, A + n) - A;
+		printf("%d\n", n);
+	}
 	return 0;
 }

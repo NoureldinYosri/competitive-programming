@@ -25,12 +25,54 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 3000 + 10;
+pi R[2][MAXN];
+int val[2][MAXN], n;
 
+
+bool match(pi *R, int *val){
+	static vi ord;
+	ord.clear();
+	loop(i, n) ord.pb(i);
+	sort(all(ord), [R](const int & a, const int & b){
+		return tie(R[a].second, R[a].first) < tie(R[b].second, R[b].first);
+	});
+	
+	set<int> S;
+	for(int i = 1; i <= n; i++) S.insert(i);
+	
+	for(int i : ord){
+		int l = R[i].first, r = R[i].second;
+		auto ptr = S.lower_bound(l);
+		if(ptr == S.end() || *ptr > r) return 0;
+		val[i] = *ptr;
+		S.erase(ptr);
+	}
+	return 1;
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d", &n);
+			
+	loop(i, n){
+		int d, u, l, r; scanf("%d %d %d %d", &d, &l, &u, &r);
+		R[0][i] = pi(d, u);
+		R[1][i] = pi(l, r);
+	}
+	
+		
+		
+	if(match(R[0], val[0]) && match(R[1], val[1])){
+		loop(i, n) printf("%d %d\n", val[0][i], val[1][i]);
+	}
+	else puts("NIE");
+
+	
+	
+	
 	
 	return 0;
 }

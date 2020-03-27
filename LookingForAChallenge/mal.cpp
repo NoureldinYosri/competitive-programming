@@ -24,13 +24,49 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 200* 1000 + 10;
+int L[MAX], R[MAX], n;
+int ans[MAX];
+bool on_floor[MAX];
 
+void dfs(int u, int p){
+	if(L[u] != -1 && L[u] != p) dfs(L[u], u);
+	else L[u] = -1;
+	if(R[u] != -1 && R[u] != p) dfs(R[u], u);
+	else R[u] = -1;
+}
+
+int Q[2*MAX], q_size;
+
+void do_kill(int u, int t){
+	q_size = 0;
+	int cur = 0;
+	Q[q_size++] = u;
+	while(cur < q_size){
+		u = Q[cur++];
+		if(u == -1 || on_floor[u]) continue;
+		on_floor[u] = 1;
+		ans[u] = t;
+		if(L[u] != -1) Q[q_size++] = L[u];
+		if(R[u] != -1) Q[q_size++] = R[u];
+	}
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int m; scanf("%d %d", &n, &m);
+	for(int i = 1; i <= n;i ++) {
+		scanf("%d %d", L + i, R + i);
+		ans[i] = -1;
+	}
+	dfs(1, 0);
+	for(int t = 1; t <= m; t++){
+		int u, h; scanf("%d %d", &u, &h);
+		do_kill((h == 1) ? L[u] : R[u], t);
+	}
+	for(int i = 1; i <= n;i ++) printf("%d\n", ans[i]);
 	return 0;
 }

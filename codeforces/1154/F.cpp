@@ -25,12 +25,42 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+const int MAXN = 2 << 10;
+int A[1 << 20];
+int n, m, K;
+pi I[1 << 20];
+vector<pi> offers;
 
+int dp[MAXN];
+int pref[MAXN];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d %d", &n, &m, &K);
+	loop(i, n) scanf("%d", A + i);
+	loop(i, m) scanf("%d %d", &I[i].first, &I[i].second);
+	sort(A, A + n);
+	n = K;
+	loop(i, m){
+		if(I[i].first > n) continue;
+		if(offers.empty() || offers.back().first != I[i].first) offers.pb(I[i]);
+		else offers.back().second = I[i].second; 
+	}
+	m = sz(offers);
+	assert(m <= n);
+	loop(i, n) pref[i] = A[i] + (i ? pref[i-1] : 0);
 	
+	for(int i = 1;i <= n; i++){
+		dp[i] = pref[i-1];
+		loop(j, m){
+			if(offers[j].first > i) continue;
+			int e = i-1, s = e - (offers[j].first - offers[j].second) + 1;
+			int tmp = dp[i - offers[j].first] + pref[e] - (s ? pref[s-1] : 0);
+			dp[i] = min(dp[i], tmp);
+		}
+	}
+	cout << dp[n] << endl;
 	return 0;
 }

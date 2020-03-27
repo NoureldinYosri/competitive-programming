@@ -24,13 +24,59 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int mod = 998244353;
 
+int add(int a, int b){
+	a += b;
+	if(a >= mod) a -= mod;
+	if(a < 0) a += mod;
+	return a;
+}
+int mul(int a, int b){
+	return (a*(ll)b)%mod;
+}
+int powmod(int a, int p){
+	if(!p) return a;
+	int b = 1;
+	for(; p > 1; p >>= 1){
+		if(p & 1) b = mul(a, b);
+		a = mul(a, a);
+	}
+	return mul(a, b);
+}
+int inv(int a){
+	return powmod(a, mod-2);
+}
+
+int p10[1 << 20], n;
+
+int solve(int len){
+	if(len == n) return 10;
+	if(len == n-1) return 10*9*2;
+	
+	assert(n-len >= 2);
+	int ret = mul(810, p10[n-len-2]);
+	ret = mul(ret, n - len - 1);
+	
+	int tmp = mul(180, p10[n-len-1]);
+	ret = add(ret, tmp);
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+
+	cin >> n;
+	p10[0] = 1;
+	for(int i = 1; i <= n;i++)
+		p10[i] = mul(10, p10[i-1]);
+	
+	for(int i = 1; i <= n; i++){
+		printf("%d%c", solve(i), " \n"[i==n]);
+	}
 	
 	return 0;
 }

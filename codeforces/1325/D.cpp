@@ -25,12 +25,65 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
+vector<ll> V;
 
+void inc(ll p2){
+	int rem = 2;
+	loop(i, sz(V)) {
+		if(V[i] & p2) continue;
+		V[i] |= p2;
+		rem--;
+		if(!rem) return;
+	}
+	for(;rem;rem--) V.pb(p2);
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	ll u, v;
+	cin >> u >> v;
+	if(v == 0){
+		if(u == 0) puts("0");
+		else puts("-1");
+		return 0;
+	}
+	V.pb(0);
+	ll p2 = 1;
+	for(;u || (v > 0); u>>=1, v>>=1, p2 <<= 1){
+		int bu = u & 1;
+		int bv = v & 1;
+		if(bu && bv){
+			V[0] |= p2;
+			v --;
+		}
+		else if(bu){
+			if(p2 == 1){
+				puts("-1");
+				return 0;
+			}
+			inc(p2 >> 1);
+			V[0] |= p2;
+			v -= 2;
+		}
+		else if(bv){
+			if(p2 == 1) {
+				puts("-1");
+				return 0;
+			}
+			inc(p2 >> 1);
+			v --;
+		}
+//		print(V, ll);
+//		cerr << v << endl;
+	}
+	if(v < 0) {
+		puts("-1");
+		return 0;
+	}
+	printf("%d\n", sz(V));
+	for(ll x : V) printf("%lld ", x);
+	puts("");
 	return 0;
 }

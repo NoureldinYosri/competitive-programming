@@ -24,13 +24,67 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 500*1000 + 10;
+const int MAXLG = 20;
+
+int R[MAX], n, m;
+int lst[MAX];
+int P[MAX][MAXLG];
 
 
+int solve(int l, int r){
+	if(lst[l] < r) return -1;
+	int k = 0;
+	while(k < MAXLG && P[l][k] <= r) k++;
+	int ans = 0; 
+	
+	while(l < r){
+//		cerr << l << ": "; prArr(P[l], 3, int);
+		while(k && P[l][k-1] >= r) k--;
+		if(k) k--;
+		ans += 1 << k;
+		l = P[l][k];
+		if(k < MAXLG) k++;
+	}
+	
+	return ans;
+}
+
+void build(){
+	for(int i = MAX-1; i >= 0; i--){
+		if(R[i] > i) {
+			lst[i] = lst[R[i]];
+			P[i][0] = R[i];
+			loop(k, MAXLG-1) P[i][k+1] = P[P[i][k]][k];
+			loop(k, MAXLG) assert(P[i][k]); 
+		}
+		else {	
+			lst[i] = R[i];
+			loop(k, MAXLG) P[i][k] = lst[i];
+		}
+	}
+}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d", &n, &m);
+	loop(i, n){
+		int l, r; scanf("%d %d", &l, &r);
+		R[l] = max(R[l], r);
+	}
+	for(int l = 0, r = 0;l < MAX; l++)
+		R[l] = r = max(R[l], r);
+	
+	build();
+	//prArr(R, 12, int);
+	
+	while(m--){
+		int l, r; scanf("%d %d", &l, &r);
+		printf("%d\n", solve(l, r));
+	}
+	
 	
 	return 0;
 }

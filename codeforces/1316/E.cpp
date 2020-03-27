@@ -24,13 +24,53 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+const int MAX = 100*1000 + 10, MAXP = 7;
+int A[MAX];
+int S[MAX][MAXP];
+int n, p, k;
+int ord[MAX];
 
-
+ll dp[2][1 << MAXP];
+int cnt[1 << MAXP];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d %d %d", &n, &p, &k);
+	loop(i, n) scanf("%d", A + i), ord[i] = i;
+	loop(i, n) loop(j, p) scanf("%d", &S[i][j]);
+	
+	sort(ord, ord + n, [](const int & a, const int & b){
+		return A[a] > A[b];
+	});
+	
+	loop(msk, (1 << p)) cnt[msk] = msk ? popcnt(msk) : 0;
+	loop(msk, (1 << p)) dp[0][msk] = - cnt[msk] * (1LL << 60);
+	
+	
+	int cur = 0, other = 1;
+	loop(t, n){
+		swap(cur, other);
+		int w = ord[t];
+		loop(msk, (1 << p)) dp[cur][msk] = -(1LL << 60);
+		for(int msk = 0;msk < (1 << p); msk++){
+			int h = t - cnt[msk];
+			if(h < 0) continue;
+			dp[cur][msk] = dp[other][msk] + (h < k) * A[w];
+		}
+		for(int msk = 0;msk < (1 << p); msk++){
+			int h = t - cnt[msk];
+			if(h < 0) continue;
+			loop(i, p) if(!((msk >> i) & 1)) {
+				int tmsk = msk | (1 << i);
+				dp[cur][tmsk] = max(dp[cur][tmsk], dp[other][msk] + S[w][i]);
+			}
+		}		
+	}
+	
+	printf("%lld\n", dp[cur][(1 << p) - 1]);
+	
 	
 	return 0;
 }

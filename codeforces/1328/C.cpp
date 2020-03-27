@@ -25,12 +25,40 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+char A[1 << 20], B[1 << 20];
+int n;
+char txt[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %s", &n, txt);
+		int are_equal = 1;
+		loop(i, n){
+			if(txt[i] == '0') A[i] = B[i] = '0';
+			else if(txt[i] == '2') {
+				if(are_equal) A[i] = B[i] = '1';
+				else {
+					A[i] = '0';
+					B[i] = '2';
+				}
+			}
+			else if(are_equal){
+				A[i] = '1';
+				B[i] = '0';
+				are_equal = 0;
+			}
+			else {
+				A[i] = '0';
+				B[i] = '1';
+			}
+		}
+		A[n] = B[n] = 0;
+		puts(A);
+		puts(B);
+	}
 	return 0;
 }

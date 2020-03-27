@@ -25,12 +25,33 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 
-
+map<vi, ll> M;
+vi iG[1 << 20];
+int n, m;
+ll value[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %d", &n, &m);
+		loop(i, n+1) iG[i].clear();
+		for(int i = 1;i <= n;i++) scanf("%lld", value + i);
+		while(m--){
+			int a, b; scanf("%d %d", &a, &b);
+			iG[b].pb(a);
+		}
+		M.clear();
+		for(int i = 1;i <= n;i++) if(!iG[i].empty()){
+			vi & V = iG[i];
+			sort(all(V));
+			M[V] += value[i];
+		}
+		ll ans = 0;
+		for(auto & p : M) ans = __gcd(ans, p.second);
+		printf("%lld\n", ans);
+	}
 	return 0;
 }

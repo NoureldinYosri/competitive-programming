@@ -24,13 +24,24 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
+const int MAX = 1 << 20;
+int B[MAX];
+int n;
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", B + i);
+	ll ans = *max_element(B, B + n);
+	map<int, ll> M;
+	loop(i, n){
+		int v = B[i] - i;
+		M[v] += B[i];
+		ans = max(ans, M[v]);
+	}
+	printf("%lld\n", ans);
 	return 0;
 }

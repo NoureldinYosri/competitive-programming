@@ -24,13 +24,25 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-
+int n, m;
+ll s;
+int A[1 << 20];
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	
+	int T; scanf("%d", &T);
+	while(T--){
+		scanf("%d %d", &n, &m);
+		s = 0;
+		loop(i, n) {
+			scanf("%d", A + i);
+			s += A[i];
+		}
+		int d = min(m - A[0] + 0LL, s - A[0]);
+		printf("%d\n", A[0] + d);
+	}
 	return 0;
 }

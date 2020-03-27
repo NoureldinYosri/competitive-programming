@@ -24,13 +24,49 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
+int n;
+int A[1 << 20];
+int B[1 << 20];
+int val[1 << 20], ord[1 << 20];
+int BIT[1 << 20];
+vi aux;
+	
+void add(int p, int v){
+	for(++p; p <= sz(aux); p += LSOne(p))
+		BIT[p] += v;
+}
 
+int get(int p){
+	int ret = 0;
+	for(++p; p; p ^= LSOne(p))
+		ret += BIT[p];
+	return ret;
+}
 
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", A + i);
+	loop(i, n) scanf("%d", B + i);
+	loop(i, n) aux.pb(A[i] - B[i]), aux.pb(B[i] - A[i]);
+	sort(all(aux));
+	aux.resize(unique(all(aux)) - aux.begin());
+	
+	ll ans = 0;
+	loop(i, n){
+		int v = B[i] - A[i];
+		v = lower_bound(all(aux), v) - aux.begin();
+		ans += i - get(v);
+		
+		v = A[i] - B[i];
+		v = lower_bound(all(aux), v) - aux.begin();
+		add(v, 1);
+	}
+	
+	cout << ans << endl;
 	
 	return 0;
 }
