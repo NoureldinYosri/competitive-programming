@@ -33,11 +33,19 @@ for f in 'template.cpp','tester.py':
 
 os.system('touch ' + os.path.join(path, 'in.in'))
 
-if 'codeforces' in path:
-	for c in "ABCDEF":
-		shutil.copy(os.path.join(path,'template.cpp'),os.path.join(path,c + '.cpp')) 
+if any([judge in path for judge in ('codeforces', 'atcoder')]):
+	n = 6
+	if "codeforces" in path and int(args.contest_id) >= 10**5:
+		n = 13
+	for k in range(n):
+		c = chr(ord('A') + k)
+		to = os.path.join(path,c + '.cpp')
+		if not os.path.exists(to):
+			shutil.copy(os.path.join(path,'template.cpp'), to) 
 	os.remove(os.path.join(path,'template.cpp'))
 
 elif args.problem_name is not None:
-	shutil.copy(os.path.join(path,'template.cpp'),os.path.join(path,args.problem_name + '.cpp')) 
+	to = os.path.join(path,args.problem_name + '.cpp')
+	if not os.path.exists(to):
+		shutil.copy(os.path.join(path,'template.cpp'), to) 
 	os.remove(os.path.join(path,'template.cpp'))	

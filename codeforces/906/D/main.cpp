@@ -27,10 +27,13 @@ const double PI = acos(-1);
 using namespace std;
 
 
+const int MAXR = 30;
 const int MAX = 100*1000 + 10;
 int A[MAX],n,mod;
 vi P;
 int notPrime[MAX];
+ll R[MAX][MAXR];
+
 
 void sieve(){
 	for(int i = 2;i < MAX;i++)
@@ -42,6 +45,8 @@ void sieve(){
 }
 
 int getPhi(int m) {
+	static unordered_map<int, int> mem;
+	if(mem.count(m)) return mem[m];
 	int n = m, phi = n;
 	for(int p : P){
 		if(p*p > n) break;
@@ -50,13 +55,16 @@ int getPhi(int m) {
 		while(n%p == 0) n /= p;
 	}
 	if(n > 1) phi -= phi/n;
+	mem[m] = phi;
 	return phi;
 }
 
 
+
 int mul(int a,int b,int m) {
-	a %= mod,b %= mod;
-	return (a*1LL*b)%m;
+	a %= m;
+	b %= m;
+	return (a*(ll)b)%m;
 }
 
 int add(int a,int b,int m) {
@@ -78,13 +86,25 @@ int powmod(int x,int p,int m) {
 	return mul(x,y,m);
 }
 
+int lg(int x){
+	int b = 0;
+	while((1LL << b) < x) b++;
+	return b;
+}
+
 
 int solve(int l, int r, int mod){
-	if (mod == 1) return 0;
 	if(l == r) return A[l]%mod;
+	if(mod == 1) return 0;
 	int x = A[l];
-	int g = __gcd(x, mod);
-	return g*powmod(x/g, solve(l+1, r, getPhi(mod/g)), mod);
+	int phi = getPhi(mod);
+	int n = solve(l+1, r, phi);
+
+	ll exact = R[l+1][min(r-l, MAXR) - 1];
+//	cerr << l+1 << " is " << A[l+1] << "**" << min(r-l, MAXR-1) << ": " << exact << " vs " << lg(mod) << " " << phi << endl;
+	if(exact >= lg(mod)) return powmod(x, n + phi, mod);		
+	
+	return powmod(x, n, mod);
 }
 
 
@@ -94,7 +114,31 @@ int main(){
 	#endif
 	sieve();
 	scanf("%d %d",&n,&mod);
-	range(i,1,n) scanf("%d",A + i);
+	range(i,1,n) scanf("%d", A + i);
+
+	loop(j, MAXR) R[n+1][j] = 1;
+	for(int i = n; i; i--) {
+		R[i][0] = A[i];
+		for(int j = 1; j < MAXR; j++) {
+			if(A[i] == 1){
+				R[i][j] = 1;
+				continue;
+			}
+			ll e = R[i+1][j-1];
+			if(e > 30) R[i][j] = LLONG_MAX;
+			else {
+				ll v = 1;
+				loop(q, e){
+					if(v < LLONG_MAX/A[i]) v *= A[i];
+					else {
+						v = LLONG_MAX;
+						break;
+					}
+				}
+				R[i][j] = v;
+			}
+		}
+	}
 
 	int Q; scanf("%d",&Q);
 	for(int q = 1;q <= Q;q++) {

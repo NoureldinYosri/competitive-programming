@@ -25,41 +25,7 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 using namespace std;
 
 const int MAX = 500 + 10;
-ll A[MAX][MAX];
 
-vi primes;
-
-void init(){
-	for(int i = 2;sz(primes) < MAX;i++){
-		bool is_prime = 1;
-		for(int j = 2;j*j <= i && is_prime;j ++)
-			if(i%j == 0)
-				is_prime = 0;
-		if(is_prime) primes.push_back(i);
-	}
-}
-
-vector<vi> solve(int m, int n){
-	vector<vi> ret;
-	if(n == 1){
-		loop(i,m) {
-			ret.push_back(vi{i+2});
-		}
-		return ret;
-	}
-	ret.emplace_back();
-	loop(i, n) ret.back().push_back(2*i+2);
-	for(int i = 2;i <= m;i++){
-		ret.emplace_back();
-		ret.back().push_back(2*i-1);
-		for(int j = 1;j < n;j++){
-			int a = ret.back()[0];
-			int b = ret[0][j];
-			ret.back().push_back(a*(b/__gcd(a,b)));
-		}
-	}
-	return ret;
-}
 
 int main(){
 #ifdef HOME
@@ -70,13 +36,15 @@ int main(){
 		puts("0");
 		return 0;
 	}
-	init();
-	vector<vi> res = solve(max(R,C), min(R,C));
+	vi rows, cols;
+	int N = 0;
 	if(R < C){
-		loop(r, R) loop(c, C) printf("%d%c", res[c][r], " \n"[c==C-1]);
+		loop(r, R) rows.pb(++N);
+		loop(c, C) cols.pb(++N);		
+	} else {
+		loop(c, C) cols.pb(++N);				
+		loop(r, R) rows.pb(++N);
 	}
-	else {
-		loop(r, R) loop(c, C) printf("%d%c", res[r][c], " \n"[c==C-1]);
-	}
+	loop(r, R) loop(c, C) printf("%d%c", rows[r]*cols[c], " \n"[c==C-1]);
 	return 0;
 }

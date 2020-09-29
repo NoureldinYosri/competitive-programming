@@ -35,7 +35,7 @@ int main(int argc,char **argv){
 #ifdef HOME
 	freopen("in.in","r",stdin);
 #endif
-	int MAX; scanf("%d %d",&n,&MAX);
+	scanf("%d %d",&n,&x);
 	loop(i,n) scanf("%d",A + i);
 	int mx = -1;
 	loop(i, n){
@@ -43,22 +43,16 @@ int main(int argc,char **argv){
 		mx = max(mx, A[i]);
 	}
 	
-	R[MAX+1] = MAX;
-	for(int i = MAX; i; i--){
-		if(bad[i] > i) R[i] = R[i+1];
-		else if(R[i+1] == i) R[i] = i-1;
+	R[x+1] = x + 1;
+	for(int i = x; i; i--){
+		if(bad[i] > i) R[i] = max(R[i+1], i);
 		else R[i] = R[i+1];
 	}
 
-	ll ans = MAX+1-R[1];
-	mx = -1;
-	for(int l = 1; l <= MAX; l++){
-		mx = max(mx, bad[l]);
-		if(bad[l] > l) MAX = min(MAX, bad[l]);
-		int r = max(mx, l) + 1;
-		cerr << l << " " << mx << " " << r << " " << R[r] << endl;
-		ans += MAX-R[r]+1;
-		cerr << l << " " << R[r] << " " << MAX+1-R[r] << endl;
+	ll ans = x+1-R[1];
+	for(int l = 1; l <= x; l++){
+
+
 	}
 	cout << ans << endl;
 	
