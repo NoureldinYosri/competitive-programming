@@ -24,54 +24,65 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+const int MAX = 1 << 20;
+int prime[MAX];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
-	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+void sieve(){
+	for(int i = 2; i < MAX; i++)
+		if(prime[i] == 0){
+			prime[i] = i;
+			for(ll j = i*(ll)i; j < MAX; j += i)
+				prime[j] = i;
+		}
 }
+
+
+int getCore(int x){
+	int y = 1;
+	while(x > 1){
+		int p = prime[x], e = 0;
+		while(x%p == 0){
+			x /= p;
+			e ^= 1;
+		}
+		if(e) y *= p;
+	}
+	return y;
+}
+
+void tc(){
+	map<int, int> M;
+	int n; scanf("%d", &n);
+	loop(i, n){
+		int x; scanf("%d", &x);
+		M[getCore(x)]++;
+	}
+	int ans[2] = {0, 0};
+	int tmp = n;
+	for(auto [x, s] : M){
+		ans[0] = max(ans[0], s);
+		if(s & 1) {
+			if(x > 1) tmp -= s;
+			ans[1] = max(ans[1], s);
+		}
+	}
+	ans[1] = max(ans[1], tmp);
+	ans[1] = max(ans[1], 1);
+	int m; scanf("%d", &m);
+	while(m--){
+		ll w; scanf("%lld", &w);
+		w = w > 0;
+		printf("%d\n", ans[w]);
+	}
+}
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	sieve();
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

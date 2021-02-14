@@ -24,54 +24,61 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+const int MAX = 200*1000 + 10;
+char S[MAX];
+int n, m;
+vi pL, pR;
+vi sL, sR;
+vi X;
+
+void tc(){
+	scanf("%d %d", &n, &m);
+	scanf("%s", S);
+	pL.clear();
+	sL.clear();
+	pR.clear();
+	sR.clear();
+	X.clear();
+	
+	for(int i = 0, x = 0, mn = 0, mx = 0; i < n; i++){
+		pL.push_back(mn);
+		pR.push_back(mx);
+		X.push_back(x);
+		if(S[i] == '+') x++;
+		else x--;
+		mn = min(mn, x);
+		mx = max(mx, x);		
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+	for(int i = n-1, x = 0, y = 0; i >= 0; i--){
+		sL.push_back(y);
+		sR.push_back(x);
+		if(S[i] == '+'){
+			x++;
+			y++;
+			x = max(x, 1);
+		} else {
+			x--;
+			y--;
+			y = min(y, -1);
+		}
+	}
+	reverse(all(sL));
+	reverse(all(sR));
+	while(m--){
+		int s, e; scanf("%d %d", &s, &e);
+		s--, e--;
+		int l = min(pL[s], X[s] + sL[e]);
+		int r = max(pR[s], X[s] + sR[e]);
+		printf("%d\n", r-l+1);
+	}
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

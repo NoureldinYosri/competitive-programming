@@ -24,54 +24,32 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
-
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+void tc(){
+	ll C[3], A[5];
+	loop(i, 3) scanf("%lld", C + i);
+	loop(i, 5) scanf("%lld", A + i);
+	loop(i, 3) {
+		if(C[i] < A[i]){
+			puts("NO");
+			return;
+		}
+		C[i] -= A[i];
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+	C[2] -= A[3] - min(A[3], C[0]);
+	C[2] -= A[4] - min(A[4], C[1]);
+	if(C[2] < 0){
+		puts("NO");
+	} else {
+		puts("YES");
+	}
 }
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

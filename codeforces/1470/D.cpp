@@ -24,54 +24,53 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+int n, m;
+vector<vi> G;
+vector<bool> vis;
+
+void tc(){
+	static vi ans;
+	scanf("%d %d", &n, &m);
+	G.clear();
+	G.resize(n + 1);
+	loop(e, m){
+		int a, b; scanf("%d %d", &a, &b);
+		G[a].push_back(b);
+		G[b].push_back(a);
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+	vis.resize(n + 1);
+	fill(all(vis), false);
+	ans.clear();
+	set<int> V;
+	V.insert(1);
+	while(!V.empty()){
+		if(!V.empty()){
+			int u = *V.begin(); V.erase(V.begin());
+			vis[u] = true;
+			ans.push_back(u);
+			for(int v : G[u]) if(!vis[v]) {
+				vis[v] = true;
+				for(int t : G[v]) if(!vis[t]) V.insert(t);
+			}
+		}		
+		while(!V.empty() && vis[*V.begin()]) V.erase(V.begin());
+	}
+	if(find(vis.begin() + 1, vis.end(), false) == vis.end()){
+		puts("YES");
+		printf("%d\n", sz(ans));
+		for(int x : ans) printf("%d ", x);
+		puts("");
+	} else {
+		puts("NO");
+	}
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

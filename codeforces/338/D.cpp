@@ -26,24 +26,48 @@ using namespace std;
 
 
 const int MAX = 10000 + 10;
-int checked[MAX];
 ll n, m;
 ll A[MAX];
 int K;
 
+ll e_euclid(ll a, ll b, ll & x, ll & y){
+    if(b == 0){
+        x = 1;
+        y = 0;
+        return a;
+    }
+    ll g = e_euclid(b, a%b, y, x);
+    
+    //b*y + (a%b)*x = g
+    //b*y + (a - (a/b)*b)*x = g
+    //b*y + a*x - (a/b)*b*x = g
+    //a*x + b*(y - (a/b)*x) = g
+    y -= (a/b)*x;
+    assert(x*(__int128)a + y*(__int128)b == g);
+    return g;
+}
+
+bool CRT(ll & a, ll & m, ll b, ll n){
+    ll g = __gcd(m, n);
+    if(abs(a - b)%g) return 0;
+    if(a < b) swap(a, b), swap(m, n);
+    __int128 L = abs(a - b)/g;
+    ll u, v;
+    e_euclid(m, n, u, v);
+    __int128 x = a - m*(u*L);
+    ll M = m * (n/g);
+    x = (x%M + M)%M;
+    assert(x%m == a);
+    assert(x%n == b);
+    a = x;
+    m = M;
+    return 1;
+}
+
 
 bool solve(){
-	loop(i, K-1) if(__gcd(A[i], A[i+1]) != 1) return 0;
-
-//	cerr << "check m" << endl;
-	ll up = m;
-	for (int i = K-1; i >= 0; i--) {
-		if (A[i] > up) return false;
-		up -= up%A[i];
-		up--;
-	}
-
-//	cerr << "check n" << endl;
+	loop(k, K-1) if(gcd(A[k], A[k + 1]) > 1) return false;
+	
 	ll N = 1;
 	for (int i = 0; i < K; i++) {
 		ll g = __gcd(N, A[i]);
@@ -53,30 +77,20 @@ bool solve(){
 		if (N > n) return false;
 	}
 	
+	N = 1;
+	ll l = 0;
+	loop(i, K) {
+		if(!CRT(l, N, ((-i-1)%A[i] + A[i])%A[i], A[i])){
+		 return false;
+		}
+		if(l + K > m) return false;
+	}
+	loop(i, K) if(gcd(l + i + 1, N) != A[i]) return false;
 
-//	cerr << "check div" << endl;
-	int K = ::K+2;
-	loop(i, K) checked[i] = ::K;
-	
-	for (int i = 0; i < ::K; i++)
-		for (int j = 2; j < K; j ++)
-			if (A[i]%j == 0) {
-				if(checked[j] == ::K) {
-					if(i - j >= 0) return 0;
-					checked[j] = i;
-				}
-				else if((i - checked[j])%j) {
-//					cerr << j << " from " << checked[j] << " to " << i << endl;
-					return 0;
-				}
-			}
-	for(int s = 2; s < K; s++)
-		for(int p = checked[s]; p < ::K; p += s)
-			if(A[p]%s)
-				return 0;
-	return true;	
+	return true;
 	
 }
+
 
 
 int main(){

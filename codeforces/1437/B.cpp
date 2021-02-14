@@ -24,54 +24,45 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+map<vector<vi>, int> dp[20][20];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+int solve(int i, int j, vector<vi> g){
+	int n = sz(g), m = sz(g[0]);
+	if(j == m) return solve(i + 1, 0, g);
+	if(i == n) return 0;
+	if(dp[i][j].count(g)) return dp[i][j][g];
+	int ret = solve(i, j + 1, g);
+	if(g[i][j] == 0){
+		g[i][j] = 1;
+		int n = sz(g);
+		for(int r = i; r < n; r++)
+			for(int c = (j + 1)*(r == i); c < m; c++)
+				if(g[r][c] == 0 && abs(i - r) + abs(j - c) == 3){
+					g[r][c] = 1;
+					ret = max(ret, 1 + solve(i, j + 1, g));
+					g[r][c] = 0;
+				}
+		g[i][j] = 0;
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
+	dp[i][j][g] = ret;
 	return ret;
+}
+
+int f(int n, int m){
+	vector<vi> g(n, vi(m, 0));
+	return solve(0, 0, g);
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
+	for(int n = 1; n <= 20; n++){
+		for(int m = 1; n*m <= 20;m ++) {
+			cout << f(n, m) << " ";
+			fflush(stdout);
 		}
+		cout << endl;
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
 	return 0;
 }

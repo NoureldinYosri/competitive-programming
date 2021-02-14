@@ -24,27 +24,18 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+double compute(int i, int m, const vector<double> & arcs){
+	double ret = 0;
+	
+	for(int d = 1; d <= m; d++){
+		int s = 1 + (d != m);
+		double x = d*arcs[i];
+		for(int j = 0; j < i; j++){
+			x = min(x, 2*(i - j) + arcs[j]*d);
+		}
+		ret += x*s;
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
 	return ret;
 }
 
@@ -52,26 +43,22 @@ int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
+	int n, m; scanf("%d %d", &n, &m);
+	vector<double> f(n + 1), arcs(n + 1);
+	for(int i = 0; i <= n; i++){
+		arcs[i] = (2*PI*i)/(2*m);
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
+	for(int i = 0; i <= n; i++){
+		f[i] = compute(i, m, arcs);
 	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+//	print(f, double);
+	double ans = 0;
+	for(auto x : f) ans += m*x;
+	loop(i, sz(f)) loop(j, i) {
+		int k = (j > 0) ? (2*m) : (m > 1);
+		double v = (i - j)*k + f[j];
+		ans += 2*m*v;
+	}
+	printf("%.10f\n", ans);
 	return 0;
 }

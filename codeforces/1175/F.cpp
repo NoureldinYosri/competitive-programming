@@ -24,54 +24,53 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+int n;
+int A[1 << 20];
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
-	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
-}
+unsigned long long f[1 << 20][2], g[1 << 20][2], pref[1 << 20][2];
+
+int nxt[1 << 20];
+int prv[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
 	scanf("%d", &n);
+	for(int i = 1; i <= n; i++) loop(j, 2) {
+		f[i][j] = rng();
+		g[i][j] = g[i - 1][j] ^ f[i][j];
+	}
 	for(int i = 1; i <= n; i++) {
 		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
+		loop(j, 2)
+			pref[i][j] = pref[i - 1][j] ^ f[A[i]][j];
+	}
+	
+
+	vi ST;
+	for(int i = n; i > 0; i--){
+		while(!ST.empty() && A[ST.back()] <= A[i]) ST.pop_back();
+		nxt[i] = ST.empty() ? -1 : ST.back();
+		ST.push_back(i);
+	}
+	
+	for(int i = 1; i <= n; i++) prv[i] = n + 1;
+	
+	ll ans = 0;
+	int lim = n + 1;
+	for(int i = n; i >= 1; i--){
+		lim = min(lim, prv[A[i]]);
+		prv[A[i]] = i;
+		int j = i;
+		for(; j != -1; j = nxt[j]){
+			int m = A[j];
+			int k = i + m - 1;
+			if(k >= lim) break;
+			ans += mp(pref[k][0] ^ pref[i - 1][0], pref[k][1] ^ pref[i - 1][1]) == mp(g[m][0], g[m][1]);
 		}
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	cout << ans << endl;
 	return 0;
 }

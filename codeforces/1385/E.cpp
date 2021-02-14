@@ -24,54 +24,69 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
-	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+int n, m;
+vp undirected;
+vector<vi> G;
+vector<bool> vis;
+vi ord, Id;
+
+void dfs(int u){
+	if(vis[u]) return ;
+	vis[u] = true;
+	for(int v : G[u]) dfs(v);
+	ord.push_back(u);
 }
+
+void tc(){
+	scanf("%d %d", &n, &m);
+	G.clear();
+	G.resize(n + 1);
+	undirected.clear();
+	loop(e, m){
+		int t, a, b; scanf("%d %d %d", &t, &a, &b);
+		if(t == 0){
+			undirected.emplace_back(a, b);
+		} else {
+			G[a].push_back(b);
+		} 
+	}
+	vis.resize(n + 1);
+	ord.clear();
+	fill(all(vis), false);
+	for(int u = 1; u <= n; u++) dfs(u);
+	Id.resize(n + 1);
+	assert(sz(ord) == n);
+	reverse(all(ord));
+	loop(i, n) Id[ord[i]] = i;
+	for(int u = 1; u <= n; u++) {
+		for(int v : G[u])
+			if(Id[v] < Id[u]){
+				puts("NO");
+				return;
+			}
+	}
+	puts("YES");
+	for(int u = 1; u <= n; u++) {
+		for(int v : G[u])
+			printf("%d %d\n", u, v);
+	}
+	for(auto [a, b] : undirected){
+		if(Id[a] < Id[b]){
+			printf("%d %d\n", a, b);
+		} else {
+			printf("%d %d\n", b, a);
+		}
+	}
+	
+}
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

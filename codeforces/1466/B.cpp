@@ -24,54 +24,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+const int MAXN = 1 << 20;
+int n, A[MAXN];
+int visId[MAXN][2], visNum;
+int dp[MAXN][2];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+int solve(int i, int c){
+	assert(c >= 0 && c <= 1);
+	if(i == n) return 0;
+	if(visId[i][c] == visNum) return dp[i][c];
+	visId[i][c] = visNum;
+	int & ret = dp[i][c];
+	ret = 0;
+	int prv = i ? A[i - 1] : (-(1 << 29));
+	loop(t, 2){
+		if(prv + c > A[i] + t) continue;
+		int tmp = solve(i + 1, max(prv + c, A[i] + t) - A[i]) + (prv+c != A[i]+t);
+		ret = max(ret, tmp);
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
 	return ret;
 }
+
+void tc(){
+	scanf("%d", &n);
+	loop(i, n) scanf("%d", A + i);
+	if(!is_sorted(A, A + n)) sort(A, A + n);
+	visNum++;
+	printf("%d\n", solve(0, 0));
+}
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

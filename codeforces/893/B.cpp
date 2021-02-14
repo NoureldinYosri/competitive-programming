@@ -24,54 +24,37 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+vi tot;
+vi have[15];
+ll target, sum[15];
+int n;
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
-	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
-}
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
 	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
+	loop(i, n){
+		int m; scanf("%d", &m);
+		loop(j, m){
+			int x; scanf("%d", &x);
+			have[i].push_back(x);
+			tot.push_back(x);
+			target += x;
+			sum[i] += x;
 		}
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
+	sort(all(tot));
+	tot.resize(unique(all(tot)) - tot.begin());
+	loop(i, n) sort(all(have[i]));
+	if(target%n){
+		puts("No");
+		return 0;
 	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	target /= n;
+	loop(i, sz(tot)) if(solve((1 << n) - 1, i)){
+		
+	}
 	return 0;
 }

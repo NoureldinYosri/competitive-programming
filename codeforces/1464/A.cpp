@@ -24,54 +24,60 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+vp V;
+vi nxt;
+vector<bool> vis;
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+int solve(){
+	int m = sz(V);
+	map<int, int> col2index;
+	loop(i, m) {
+		col2index[V[i].second] = i;
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+	nxt.resize(m);
+	loop(i, m){
+		int x = V[i].first;	
+		if(col2index.count(x)) nxt[i] = col2index[x];
+		else nxt[i] = -1;
+	}
+	vis.resize(m);
+	fill(all(vis), false);
+//	print(nxt, int);
+	int ans = 0;
+	loop(i, m) if(!vis[i]){
+		int j = i;
+		int ctr = 0;
+		while(j != -1 && !vis[j]) {
+			vis[j] = true;
+			ctr++;
+			j = nxt[j];
+		}
+		ans += ctr;
+		ans += j == i;
+	}	
+	return ans;
+}
+void tc(){
+	int n, m; scanf("%d %d", &n, &m);
+	V.clear();
+	loop(i, m){
+		int x, y; scanf("%d %d", &x, &y);
+		if(x == y) continue;
+		V.emplace_back(x, y);
+	}
+	m = sz(V);
+	int ans = solve();
+	for(auto & [x, y] : V) swap(x, y);
+	ans = min(ans, solve());
+	
+	printf("%d\n", ans);
 }
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int T; scanf("%d", &T);
+	while(T--) tc();
 	return 0;
 }

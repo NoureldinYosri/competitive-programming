@@ -24,54 +24,55 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+
+void gauss(vector<vector<double>> & A){
+	int m = sz(A);
+	vi P(m);
+	iota(all(P), 0);
+	loop(p, m){
+		int r = -1;
+		for(int i = p; i < m; i++)
+			if(A[i][p]){
+				r = i;
+				break;
+			}
+		assert(r != -1);
+		if(r != p){
+			A[r].swap(A[p]);
+			swap(P[r], P[p]);
+		}
+		double scaler = 1/A[p][p];
+		for(double & x : A[p]) x *= scaler;
+		for(int i = p + 1; i < m; i++){
+			double c = A[i][p];
+			for(int j = p; j < sz(A[i]); j++)
+				A[i][j] -= c * A[p][j];
+		}
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+	for(int p = m-1; p > 0; p--){
+		for(int r = p-1; r >= 0; r--){
+			double v = A[r][p];
+			for(int c = p; c < sz(A[r]); c++)
+				A[r][c] -= v * A[p][c];
+		}
+	}
+	vector<vector<double>> aux(m);
+	loop(i, m) aux[i] = A[P[i]];
+	A.swap(aux);
 }
+
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
+	int n; 
 	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
-		}
-	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
-	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
 
+	vector<vector<double>> A(n, vector<double>(n + 1, 0.0));
+	loop(i, n) loop(j, n + 1) scanf("%lf", &A[i][j]);
+	gauss(A);
+	loop(i, n) printf("%0.5f\n", A[i].back());
 	return 0;
 }

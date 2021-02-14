@@ -24,28 +24,41 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
+const int B = 10;
+int n;
+int ones[1 << 20], zeros[1 << 20];
+int val[1 << 20];
+int cnt[1 << 20][B];
+
+
+void read(int i){
+	static char buffer[10];
+	scanf("%s", buffer);
+	ones[i] = zeros[i] = 0;
+	loop(j, 8){
+		ones[i] |= (buffer[j] == 'W') << j;
+		zeros[i] |= (buffer[j] == 'R') << j;
 	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+}
+
+bool result[1 << 20];
+vi adj[1 << 20];
+
+void set_val(int i, int new_val){
+	assert(val[i] != new_val);
+	int old_val = val[i];
+	val[i] = new_val;
+	for(int j : adj[i]){
+		if(old_val != -1) 
+			cnt[j][old_val]--;
+		cnt[j][new_val]++;
+		int k = find(cnt[j], cnt[j] + B, 0) - cnt[j];
+		if(val[j] != k) {
+			assert(cnt[j][k] == 0);
+			set_val(j, k);
+		}
+	}
 }
 
 int main(){
@@ -53,25 +66,20 @@ int main(){
 	freopen("in.in", "r", stdin);
 #endif
 	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
+	loop(i, n) {
+		read(i);
+		for(int d = 1; d <= 8 && i - d >= 0; d++){
+			int j = i - d;
+			int common = popcnt(ones[i] & ones[j]) + popcnt(zeros[i] & zeros[j]);
+			if(d <= common) adj[i].push_back(j);
 		}
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
+	fill(val, val + n, -1);
+	for(int m = 1; m <= n; m++){
+		set_val(m - 1, 0);
+		result[m - 1] = val[0];
 	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	loop(i, n) putchar(2-result[i] + '0');
+	puts("");
 	return 0;
 }

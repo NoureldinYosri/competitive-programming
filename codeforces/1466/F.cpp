@@ -24,54 +24,73 @@ std::ostream& operator << (std::ostream& st,const std::pair<A,B> p) {
 }
 using namespace std;
 
-const int MAXN = 5000 + 10;
-int A[MAXN], n;
-int nxt[MAXN];
-int bestIndex[MAXN][MAXN];
+const int mod = 1e9 + 7;
+int n, m;
+vi ans;
+int Rank;
 
-int dp[MAXN][MAXN];
-int solve(int s, int e, int h0){
-	if(e-s-1 <= 0) return 0;
-	int & ret = dp[s][e];
-	if(ret != -1) return ret;
-	ret = e-s-1;
-	int h = A[bestIndex[s + 1][e - 1]];
-	int prv = s;
-	ll  tmp = h - h0;
-	for(int i = bestIndex[s + 1][e - 1]; i < e; i = nxt[i]) {
-		tmp += solve(prv, i, h);
-		prv = i; 		
-	}
-	tmp += solve(prv, e, h);
-	ret = min(ret + 0LL, tmp);
-//	cerr << s << " " << e << ": " << ret << endl;
-	return ret;
+
+int id[1 << 20];
+vi X[1 << 20];
+
+int find(int a){
+	if(a == -1) return -1;
+	return id[a] = (a == id[a]) ? a : find(id[a]);
 }
+
+bool done[1 << 20];
 
 int main(){
 #ifdef HOME
 	freopen("in.in", "r", stdin);
 #endif
-	scanf("%d", &n);
-	for(int i = 1; i <= n; i++) {
-		scanf("%d", A + i);
-	}	
-	for(int i = 1; i <= n; i++) {
-		int mn = -1;
-		for(int j = i; j <= n; j++){
-			if(mn == -1) mn = j;
-			else if(A[j] < A[mn]) mn = j;
-			bestIndex[i][j] = mn;
+	scanf("%d %d", &n, &m);
+	loop(i, n){
+		int z; scanf("%d", &z);
+		loop(j, z){
+			int x; scanf("%d", &x);
+			x--;
+			X[i].push_back(x);
 		}
 	}
-	map<int, int> lst;
-	for(int i = n; i; i--){
-		if(lst.count(A[i])) nxt[i] = lst[A[i]];
-		else nxt[i] = n + 1;
-		lst[A[i]] = i;
+	iota(id, id + m, 0);
+	vi aux;
+	loop(p, n){
+		if(sz(X[p]) == 1){
+			int i = X[p][0];
+			i = find(i);
+			if(i == -1) continue;
+			if(!done[i]){
+				ans.push_back(p);
+				done[i] = true;
+				Rank++;
+				id[i] = -1;
+			}
+		} else {
+			int i = X[p][0], j = X[p][1];
+			i = find(i);
+			j = find(j);
+			aux.clear();
+			if(i != -1 && !done[i]) aux.push_back(i);
+			if(j != -1
+			Rank++;
+			ans.push_back(p);
+			done[i] = true;
+			if(!done[j]){
+				id[i] = j;
+			} else {
+				id[i] = -1;
+			}
+		}
 	}
-	memset(dp, -1, sizeof dp);
-	cout << solve(0, n + 1, 0) << endl;
-
+	int ans = 1;
+	loop(i, Rank) {
+		ans += ans;
+		if(ans >= mod) ans -= mod;
+	}
+	printf("%d %d\n", ans, sz(::ans));
+	sort(all(::ans));
+	for(int x : ::ans) printf("%d ", x + 1);
+	puts("");
 	return 0;
 }
