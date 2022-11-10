@@ -1,4 +1,4 @@
-codeforces (https://codeforces.com/profile/Noureldin)  [ICPCID] (https://icpc.global/ICPCID/LT8YMZ4O6VLU)
+[codeforces](https://codeforces.com/profile/Noureldin) --- [ICPCID](https://icpc.global/ICPCID/LT8YMZ4O6VLU)
 
 I started competitive programming in 2013 with my first competition being [GCJ](https://codingcompetitions.withgoogle.com/codejam) and was active until 2019 though my final competition was the 2020 world finals of [ICPC](https://icpc.global/)
 
